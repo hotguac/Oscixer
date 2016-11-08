@@ -29,18 +29,23 @@ public class CixListener extends Service {
     private OSCPortOut oscPortOut;
     private OSCPortIn oscportin;
     private String lastMessage;
+    private Context ui;
+
+    public final int MAX_STRIPS = 1024;
 
     public CixListener() {
         attachPorts(targetIP, targetPort);
     }
 
     public CixListener(String ip, int port) {
+        //TODO: move port and ip to a bind called routine
         targetPort = port;
         targetIP = ip;
     }
 
     @Override
     public void onCreate() {
+        //TODO: move attach listeners to bind called routine
         super.onCreate();
         attachListeners();
     }
@@ -60,9 +65,6 @@ public class CixListener extends Service {
     /**
      * method for clients
      */
-    //public int getRandomNumber() {
-    //    return mGenerator.nextInt(100);
-    //}
     public String getLastMessage() {
         return lastMessage;
     }
@@ -75,7 +77,6 @@ public class CixListener extends Service {
         } catch (Exception e) {
             return;
         }
-
     }
 
     public void stopTransport() {
@@ -102,8 +103,9 @@ public class CixListener extends Service {
         } catch (SocketException e) {
             e.printStackTrace();
         }
-
     }
+
+    private float[] strip_gains = new float[MAX_STRIPS];
 
     private void attachListeners() {
         final Context context = this;
@@ -111,9 +113,19 @@ public class CixListener extends Service {
             @Override
             public void acceptMessage(Date time, OSCMessage message) {
                 // do something
-                OSCMessage myMessage = message;
                 try {
-                    lastMessage = myMessage.toString();
+                    final OSCMessage myMessage = message;
+                    lastMessage = myMessage.getArguments().toString(); //TODO: write extract function
+                    int strip = (int) myMessage.getArguments().get(0);
+                    strip_gains[strip] = (float) myMessage.getArguments().get(1);
+
+                    // update the UI TODO: move to class and only update if the ui is showing the appropriate control
+                    ((DisplayMessageActivity) ui).textView.post(new Runnable() {
+                        public void run() {
+                            ((DisplayMessageActivity) ui).textView.setText(myMessage.getArguments().toString());
+                        }
+                    });
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -123,7 +135,8 @@ public class CixListener extends Service {
         oscportin.startListening();
     }
 
-    private void connectSurface() {
+    public void connectSurface(Context context) {
+        ui = context;
         // Creating the message
         ArrayList<Object> moreThingsToSend = new ArrayList<Object>();
         moreThingsToSend.add(0); // bank size 0 = all on one

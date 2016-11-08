@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import static com.jkokosa.oscixer.MainActivity.EXTRA_MESSAGE;
@@ -17,7 +18,7 @@ public class DisplayMessageActivity extends AppCompatActivity {
      * Messenger for communicating with service.
      */
     boolean mBound = false;
-
+    private Context myUI = this;
 
     public TextView textView;
     /* These two variables hold the IP address and port number.
@@ -39,8 +40,13 @@ public class DisplayMessageActivity extends AppCompatActivity {
         ViewGroup layout = (ViewGroup) findViewById(R.id.activity_display_message);
         layout.addView(textView);
 
+        Button btnStart = new Button(this);
+        btnStart.setTextSize(40);
+        btnStart.setText("Start");
 
-        listener = new CixListener();
+        layout.addView(btnStart);
+
+        //listener = new CixListener();
 
     }
 
@@ -62,6 +68,8 @@ public class DisplayMessageActivity extends AppCompatActivity {
             CixListener.LocalBinder binder = (CixListener.LocalBinder) service;
             listener = binder.getService();
             mBound = true;
+            listener.connectSurface(myUI);
+            listener.startTransport();
         }
 
         @Override
