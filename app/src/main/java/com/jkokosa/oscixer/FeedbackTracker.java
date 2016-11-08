@@ -1,5 +1,7 @@
 package com.jkokosa.oscixer;
 
+import java.util.ArrayList;
+
 /**
  * Created by jkokosa on 11/8/16.
  */
@@ -20,15 +22,36 @@ public class FeedbackTracker {
     private static int STATUS_DISPLAYED = 1;
     private static int STATUS_CACHED = 2;
 
-    public abstract class FeedbackChannel {
+    protected ArrayList<AudioTrack> audio_tracks;
+
+    public FeedbackTracker() {
+        audio_tracks = new ArrayList<>(256);
+    }
+
+    public float getTrackGain(int stripID) {
+        float gain = -999.99f;
+
+        for (AudioTrack track : audio_tracks) {
+            if (track.getId() == stripID) {
+                gain = track.getGain();
+            }
+        }
+        return gain;
+    }
+
+    private abstract class FeedbackChannel {
         private String name;
         private int id;
         private int status;
         private int mute;
         private int solo;
 
-        public void FeedbackChannel(int trackID) {
-            setId(id);
+        public FeedbackChannel() {
+
+        }
+
+        public FeedbackChannel(int trackID) {
+            setId(trackID);
             setStatus(STATUS_UNKNOWN);
         }
 
@@ -57,10 +80,39 @@ public class FeedbackTracker {
         }
     }
 
+
     public class AudioTrack extends FeedbackChannel {
 
-        void AudioTrack(int trackID) {
-            super.FeedbackChannel(trackID);
+        private float gain;
+
+        public AudioTrack(int trackID) {
+            setId(trackID);
+            setStatus(STATUS_UNKNOWN);
+        }
+
+        public float getGain() {
+            return gain;
+        }
+
+        public void setGain(float gain) {
+            this.gain = gain;
         }
     }
+
+    public void setTrackGain(int trackID, float gain) {
+        boolean found = false;
+        for (AudioTrack track : audio_tracks) {
+            if (track.getId() == trackID) {
+                track.setGain(gain);
+                found = true;
+            }
+        }
+        if (!found) {
+            AudioTrack trk = new AudioTrack(trackID);
+            trk.setGain(gain);
+            audio_tracks.add(trk);
+        }
+    }
+
+
 }

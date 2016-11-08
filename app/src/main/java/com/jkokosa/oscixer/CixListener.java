@@ -31,6 +31,8 @@ public class CixListener extends Service {
     private String lastMessage;
     private Context ui;
 
+    private FeedbackTracker fbTracker = new FeedbackTracker();
+
     public final int MAX_STRIPS = 1024;
 
     public CixListener() {
@@ -115,16 +117,12 @@ public class CixListener extends Service {
                 // do something
                 try {
                     final OSCMessage myMessage = message;
-                    lastMessage = myMessage.getArguments().toString(); //TODO: write extract function
+                    //lastMessage = myMessage.getArguments().toString(); //TODO: write extract function
                     int strip = (int) myMessage.getArguments().get(0);
-                    strip_gains[strip] = (float) myMessage.getArguments().get(1);
-
+                    //strip_gains[strip] = (float) myMessage.getArguments().get(1);
+                    fbTracker.setTrackGain(strip, (float) myMessage.getArguments().get(1));
                     // update the UI TODO: move to class and only update if the ui is showing the appropriate control
-                    ((DisplayMessageActivity) ui).textView.post(new Runnable() {
-                        public void run() {
-                            ((DisplayMessageActivity) ui).textView.setText(myMessage.getArguments().toString());
-                        }
-                    });
+                    updateStrip(strip);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -133,6 +131,15 @@ public class CixListener extends Service {
         };
         oscportin.addListener("/strip/gain", listener);
         oscportin.startListening();
+    }
+
+    private void updateStrip(final int stripID) {
+        ((DisplayMessageActivity) ui).textView.post(new Runnable() {
+            public void run() {
+                ((DisplayMessageActivity) ui).textView.setText(stripID + " : " + fbTracker.getTrackGain(stripID));
+            }
+        });
+
     }
 
     public void connectSurface(Context context) {
