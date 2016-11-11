@@ -1,63 +1,42 @@
 package com.jkokosa.oscixer;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.illposed.osc.OSCListener;
 import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPortIn;
-import com.illposed.osc.OSCPortOut;
 
-import java.io.IOException;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Date;
 
 
 public class CixListener extends Service {
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
-    private DatagramSocket mySocket;
-    private int targetPort = 3819;
-    private String targetIP = "192.168.0.16";
-    private OSCPortOut oscPortOut;
     private OSCPortIn oscportin;
-    private String lastMessage;
-    private Context ui;
-
     private FeedbackTracker fbTracker = new FeedbackTracker();
 
-    public final int MAX_STRIPS = 1024;
-
-    public CixListener() {
-        attachPorts(targetIP, targetPort);
-    }
-
-    public CixListener(String ip, int port) {
-        //TODO: move port and ip to a bind called routine
-        targetPort = port;
-        targetIP = ip;
+    public void setSocket(DatagramSocket sock) {
+        oscportin = new OSCPortIn(sock);
     }
 
     @Override
     public void onCreate() {
         //TODO: move attach listeners to bind called routine
         super.onCreate();
-        attachListeners();
+        //attachListeners();
     }
+    // Random number generator
+    //private final Random mGenerator = new Random();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return super.onStartCommand(intent, flags, startId);
     }
-    // Random number generator
-    //private final Random mGenerator = new Random();
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -67,98 +46,92 @@ public class CixListener extends Service {
     /**
      * method for clients
      */
-    public String getLastMessage() {
-        return lastMessage;
-    }
 
-    public void startTransport() {
-        try {
-            // Creating the message
-            OSCMessage message = new OSCMessage("/transport_play");
-            oscPortOut.send(message);
-        } catch (Exception e) {
-            return;
-        }
-    }
-
-    public void stopTransport() {
-        try {
-            OSCMessage message2 = new OSCMessage("/transport_stop");
-
-            // Pause for half a second
-            //sleep(1500);
-            oscPortOut.send(message2);
-        } catch (Exception e) {
-            // Error handling for some error
-        }
-    }
-
-    private void attachPorts(String myIP, int port) {
-        //String myIP = "192.168.0.16";
-        try {
-            InetAddress target = InetAddress.getByName(myIP);
-            mySocket = new DatagramSocket();
-            oscPortOut = new OSCPortOut(target, targetPort, mySocket);
-            oscportin = new OSCPortIn(mySocket);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private float[] strip_gains = new float[MAX_STRIPS];
-
-    private void attachListeners() {
-        final Context context = this;
+    public void attachListeners() {
         OSCListener listener = new OSCListener() {
             @Override
             public void acceptMessage(Date time, OSCMessage message) {
                 // do something
                 try {
-                    final OSCMessage myMessage = message;
-                    //lastMessage = myMessage.getArguments().toString(); //TODO: write extract function
-                    int strip = (int) myMessage.getArguments().get(0);
+                    String myAddress = message.getAddress();
+
+                    switch (myAddress) {
+                        case "/strip/gain":
+                            int strip = (int) message.getArguments().get(0);
+                            fbTracker.setTrackGain(strip, (float) message.getArguments().get(1));
+                            updateStrip(strip);
+                            break;
+                        case "/strip/mute":
+                            break;
+                        case "/strip/solo":
+                            break;
+                        case "/strip/expand":
+                            break;
+                        case "/strip/name":
+                            break;
+                        case "/strip/monitor_input":
+                            break;
+                        case "/strip/monitor_disk":
+                            break;
+                        case "/strip/recenable":
+                            break;
+                        case "/strip/record_safe":
+                            break;
+                        case "/strip/select":
+                            break;
+                        case "/strip/trimdB":
+                            break;
+                        case "/strip/pan_stereo_position":
+                            break;
+
+                        default:
+                            Log.v("listener", message.getAddress());
+                            break;
+                    }
+
                     //strip_gains[strip] = (float) myMessage.getArguments().get(1);
-                    fbTracker.setTrackGain(strip, (float) myMessage.getArguments().get(1));
+                    /*if (myAddress.equals("/strip/gain")) {
+                        fbTracker.setTrackGain(strip, (float) myMessage.getArguments().get(1));
+                    } else {
+                        Log.v("listener",myMessage.getAddress());
+                    }*/
+
                     // update the UI TODO: move to class and only update if the ui is showing the appropriate control
-                    updateStrip(strip);
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.v("listenerError", message.getAddress());
+                    //e.printStackTrace();
                 }
             }
         };
-        oscportin.addListener("/strip/gain", listener);
+
+        oscportin.addListener("/bank_up", listener);
+        oscportin.addListener("/bank_down", listener);
+        oscportin.addListener("loop_toggle", listener);
+        oscportin.addListener("transport_play", listener);
+        oscportin.addListener("transport_stop", listener);
+        oscportin.addListener("/rewind", listener);
+        oscportin.addListener("/ffwd", listener);
+        oscportin.addListener("/ffwd", listener);
+        oscportin.addListener("/session_name", listener);
+        oscportin.addListener("/record_tally", listener);
+        oscportin.addListener("/cancel_all_solos", listener);
+        oscportin.addListener("/rec_enable_toggle", listener);
+        oscportin.addListener("/strip/*", listener);
+        oscportin.addListener("/select/*", listener);
+        oscportin.addListener("/master/*", listener);
+        oscportin.addListener("/monitor/*", listener);
         oscportin.startListening();
     }
 
-    private void updateStrip(final int stripID) {
-        ((DisplayMessageActivity) ui).textView.post(new Runnable() {
+    private void updateStrip(final int stripID) { // TODO: need to communicate back to UI
+        /*((ControlActivity) ui).textView.post(new Runnable() {
             public void run() {
-                ((DisplayMessageActivity) ui).textView.setText(stripID + " : " + fbTracker.getTrackGain(stripID));
+                ((ControlActivity) ui).textView.setText(stripID + " : " + fbTracker.getTrackGain(stripID));
+                ((ControlActivity) ui).refresh();
             }
         });
-
-    }
-
-    public void connectSurface(Context context) {
-        ui = context;
-        // Creating the message
-        ArrayList<Object> moreThingsToSend = new ArrayList<Object>();
-        moreThingsToSend.add(0); // bank size 0 = all on one
-        moreThingsToSend.add(21); // strips
-        moreThingsToSend.add(3); // feed back
-        moreThingsToSend.add(0); // gain mode
-
-        //OSCMessage message = new OSCMessage("/transport_play", Arrays.asList(thingsToSend));
-        OSCMessage message = new OSCMessage("/set_surface", moreThingsToSend);
-
-        try {
-            oscPortOut.send(message);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+*/
     }
 
     /**

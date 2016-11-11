@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:defaultValue="192.168.0.0"
+        android:key="target_host"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="192.168.0.0"
+        android:title="DAW Host IP" />
+    <EditTextPreference
+        android:defaultValue="3819"
+        android:key="target_port"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="3819"
+        android:title="DAW Host Port" />
+</PreferenceScreen>
