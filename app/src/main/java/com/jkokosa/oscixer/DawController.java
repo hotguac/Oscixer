@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * Created by jkokosa on 11/9/16.
  */
 
-public class DawController {
+class DawController {
     private DatagramSocket mySocket;
     private OSCPortOut oscPortOut;
 
@@ -38,13 +38,12 @@ public class DawController {
         }
     }
 
-    public DatagramSocket attachPorts(String myIP, int port) {
+    DatagramSocket attachPorts(String myIP, int port) {
 
         try {
             InetAddress target = InetAddress.getByName(myIP);
             mySocket = new DatagramSocket();
-            int targetPort = 3819;
-            oscPortOut = new OSCPortOut(target, targetPort, mySocket);
+            oscPortOut = new OSCPortOut(target, port, mySocket);
         } catch (UnknownHostException | SocketException e) {
             e.printStackTrace();
         }
@@ -52,7 +51,7 @@ public class DawController {
         return mySocket;
     }
 
-    public void connectSurface() {
+    void connectSurface() {
         // Creating the message
         ArrayList<Object> moreThingsToSend = new ArrayList<>();
         moreThingsToSend.add(0); // bank size 0 = all on one

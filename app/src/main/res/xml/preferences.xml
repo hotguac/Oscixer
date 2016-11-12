@@ -2,14 +2,15 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <EditTextPreference
-        android:defaultValue="192.168.0.0"
+        android:defaultValue="192.168.0.16"
         android:key="target_host"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:summary="192.168.0.0"
+        android:summary="192.168.0.16"
         android:title="DAW Host IP" />
     <EditTextPreference
         android:defaultValue="3819"
+        android:inputType="numberDecimal"
         android:key="target_port"
         android:selectAllOnFocus="true"
         android:singleLine="true"

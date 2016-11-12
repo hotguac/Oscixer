@@ -18,10 +18,6 @@ public class FeedbackTracker {
     Monitor Section
      */
 
-    private static int STATUS_UNKNOWN = 0;
-    private static int STATUS_DISPLAYED = 1;
-    private static int STATUS_CACHED = 2;
-
     protected ArrayList<FeedbackChannel> audio_tracks;
 
     public FeedbackTracker() {
@@ -39,7 +35,7 @@ public class FeedbackTracker {
         return gain;
     }
 
-    public void setTrackGain(int trackID, float gain) {
+    void setTrackGain(int trackID, float gain) {
         boolean found = false;
         for (FeedbackChannel track : audio_tracks) {
             if (track.getId() == trackID) {
@@ -66,8 +62,10 @@ V/listener: /strip/trimdB
 V/listener: /strip/pan_stereo_position*/
     private class FeedbackChannel {
         private int id;
-        private int status;
         private String name;
+        private float gain;
+
+        /*
         private int mute;
         private int solo;
         private int solo_iso;
@@ -83,19 +81,13 @@ V/listener: /strip/pan_stereo_position*/
         private float fader;
         private float pan_stero_position;
         private float pan_stero_width;
-        private float gain;
         private float send_gain;
         private float send_fader;
         private float send_enable;
-
-        public FeedbackChannel() {
-
-        }
+        */
 
         public FeedbackChannel(int trackID) {
             setId(trackID);
-            setStatus(STATUS_UNKNOWN);
-
         }
 
         public String getName() {
@@ -114,19 +106,11 @@ V/listener: /strip/pan_stereo_position*/
             this.id = id;
         }
 
-        public int getStatus() {
-            return status;
-        }
-
-        public void setStatus(int status) {
-            this.status = status;
-        }
-
-        public float getGain() {
+        float getGain() {
             return gain;
         }
 
-        public void setGain(float gain) {
+        void setGain(float gain) {
             this.gain = gain;
         }
 

@@ -2,8 +2,11 @@ package com.jkokosa.oscixer;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.util.Log;
 
 import com.illposed.osc.OSCListener;
@@ -15,10 +18,14 @@ import java.util.Date;
 
 
 public class CixListener extends Service {
-    // Binder given to clients
-    private final IBinder mBinder = new LocalBinder();
+
+    public static final int FB_GAIN = 0;
+    static final int MSG_REGISTER = 0;
+    static final int MSG_GET_STRIP = 1;
     private OSCPortIn oscportin;
     private FeedbackTracker fbTracker = new FeedbackTracker();
+    private Messenger mMessenger = new Messenger((new IncomingHandler(this)));
+    private Messenger mActivity = null;
 
     public void setSocket(DatagramSocket sock) {
         oscportin = new OSCPortIn(sock);
@@ -26,12 +33,8 @@ public class CixListener extends Service {
 
     @Override
     public void onCreate() {
-        //TODO: move attach listeners to bind called routine
         super.onCreate();
-        //attachListeners();
     }
-    // Random number generator
-    //private final Random mGenerator = new Random();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -40,7 +43,7 @@ public class CixListener extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return mBinder;
+        return mMessenger.getBinder();
     }
 
     /**
@@ -89,13 +92,6 @@ public class CixListener extends Service {
                             break;
                     }
 
-                    //strip_gains[strip] = (float) myMessage.getArguments().get(1);
-                    /*if (myAddress.equals("/strip/gain")) {
-                        fbTracker.setTrackGain(strip, (float) myMessage.getArguments().get(1));
-                    } else {
-                        Log.v("listener",myMessage.getAddress());
-                    }*/
-
                     // update the UI TODO: move to class and only update if the ui is showing the appropriate control
 
                 } catch (Exception e) {
@@ -112,7 +108,6 @@ public class CixListener extends Service {
         oscportin.addListener("transport_stop", listener);
         oscportin.addListener("/rewind", listener);
         oscportin.addListener("/ffwd", listener);
-        oscportin.addListener("/ffwd", listener);
         oscportin.addListener("/session_name", listener);
         oscportin.addListener("/record_tally", listener);
         oscportin.addListener("/cancel_all_solos", listener);
@@ -125,23 +120,41 @@ public class CixListener extends Service {
     }
 
     private void updateStrip(final int stripID) { // TODO: need to communicate back to UI
-        /*((ControlActivity) ui).textView.post(new Runnable() {
-            public void run() {
-                ((ControlActivity) ui).textView.setText(stripID + " : " + fbTracker.getTrackGain(stripID));
-                ((ControlActivity) ui).refresh();
-            }
-        });
-*/
+        Message msg = Message.obtain(null, FB_GAIN);
+        Bundle bundle = new Bundle();
+        bundle.putInt("strip", stripID);
+        bundle.putFloat("gain", fbTracker.getTrackGain(stripID));
+
+        msg.setData(bundle);
+        try {
+            mActivity.send(msg);
+        } catch (Exception e) {
+            //
+        }
+
     }
 
-    /**
-     * Class used for the client Binder.  Because we know this service always
-     * runs in the same process as its clients, we don't need to deal with IPC.
-     */
-    public class LocalBinder extends Binder {
-        CixListener getService() {
-            // Return this instance of LocalService so clients can call public methods
-            return CixListener.this;
+    static class IncomingHandler extends Handler {
+        CixListener cix;
+
+        IncomingHandler(CixListener cixL) {
+            this.cix = cixL;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_REGISTER:
+                    cix.mActivity = msg.replyTo;
+                    DatagramSocket sock = (DatagramSocket) msg.obj;
+                    cix.setSocket(sock);
+                    cix.attachListeners();
+                    break;
+
+                case MSG_GET_STRIP:
+                    cix.updateStrip(msg.arg1);
+                    break;
+            }
         }
     }
 
