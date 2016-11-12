@@ -80,8 +80,6 @@ public class ControlActivity extends AppCompatActivity {
             port = Integer.parseInt(target_port);
         } catch (Exception e) {
             // TODO: update port in the shared prefs to be default value
-            //EditTextPreference editText = (EditTextPreference) manager.findPreference("target_host");
-            //editText.setSummary(editText.getText());
             port = 3819;
         } finally {
             sock = controller.attachPorts(target_host, port);
