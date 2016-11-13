@@ -13,7 +13,8 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.ViewGroup;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.TextView;
 
 import java.net.DatagramSocket;
@@ -58,16 +59,17 @@ public class ControlActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_display_message);
+
+        setContentView(R.layout.control_surface);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
 
         Intent intent = getIntent();
         String msg = intent.getStringExtra(EXTRA_MESSAGE);
-        textView = new TextView(this);
-        textView.setTextSize(40);
-        textView.setText(msg);
 
-        ViewGroup layout = (ViewGroup) findViewById(R.id.activity_display_message);
-        layout.addView(textView);
+        textView = (TextView) findViewById(R.id.feedback_text);
+        textView.setText(msg);
 
         controller = new DawController();
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -92,6 +94,33 @@ public class ControlActivity extends AppCompatActivity {
         // Bind to LocalService
         Intent intent = new Intent(this, CixListener.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        // TODO: unbind on pause and stop and rebind on resume
+    }
+
+    public void onClicks(View view) {
+        switch (view.getId()) {
+            case R.id.transport_play:
+                controller.startTransport();
+                break;
+            case R.id.transport_stop:
+                controller.stopTransport();
+                break;
+            case R.id.transport_home:
+                controller.goHome();
+                break;
+            case R.id.transport_end:
+                controller.goEnd();
+                break;
+            case R.id.transport_prev_mark:
+                controller.prevMark();
+                break;
+            case R.id.transport_next_mark:
+                controller.nextMark();
+                break;
+            case R.id.transport_loop:
+                controller.toggle_loop();
+                break;
+        }
     }
 
     static class ResponseHandler extends Handler {

@@ -38,6 +38,56 @@ class DawController {
         }
     }
 
+    public void toggle_loop() {
+        try {
+            OSCMessage message2 = new OSCMessage("/loop_toggle");
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
+
+    public void goHome() {
+        try {
+            OSCMessage message2 = new OSCMessage("/goto_start");
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
+
+    public void goEnd() {
+        try {
+            OSCMessage message2 = new OSCMessage("/goto_end");
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
+
+    public void prevMark() {
+        try {
+            OSCMessage message2 = new OSCMessage("/prev_marker");
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
+
+    public void nextMark() {
+        try {
+            OSCMessage message2 = new OSCMessage("/next_marker");
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
+
     DatagramSocket attachPorts(String myIP, int port) {
 
         try {

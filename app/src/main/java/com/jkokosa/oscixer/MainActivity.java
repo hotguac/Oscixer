@@ -16,7 +16,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    /** Called when the user clicks the Send button */
+    /**
+     * Called when the user clicks the Send button
+     */
     public void displayControls(View view) {
         Intent intent = new Intent(this, ControlActivity.class);
         String message = ""; //editText.getText().toString();

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/control_surface"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat" />
+
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+
+        <android.support.v7.widget.LinearLayoutCompat
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="125"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/strip_up"
+                android:layout_width="match_parent"
+
+                android:layout_height="0dp"
+                android:layout_weight="25"
+                android:elevation="2dp"
+                android:onClick="onClicks" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/strip_down"
+                android:layout_width="match_parent"
+
+                android:layout_height="0dp"
+                android:layout_weight="25"
+                android:elevation="2dp"
+                android:onClick="onClicks" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/prev_strip"
+                android:layout_width="match_parent"
+
+                android:layout_height="0dp"
+                android:layout_weight="25"
+                android:elevation="2dp"
+                android:onClick="onClicks" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/next_strip"
+                android:layout_width="match_parent"
+
+                android:layout_height="0dp"
+                android:layout_weight="25"
+                android:elevation="2dp"
+                android:onClick="onClicks" />
+
+        </android.support.v7.widget.LinearLayoutCompat>
+
+        <android.support.v7.widget.LinearLayoutCompat
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="875"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="75"
+                android:orientation="vertical">
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/feedback_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="15" />
+
+                <android.support.v7.widget.AppCompatImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="85" />
+            </android.support.v7.widget.LinearLayoutCompat>
+
+            <android.support.v7.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="25"
+                android:orientation="horizontal">
+
+                <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/transport_stop"
+                    android:layout_width="0dp"
+
+                    android:layout_height="match_parent"
+                    android:layout_weight="20"
+                    android:elevation="2dp"
+                    android:onClick="onClicks" />
+
+                <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/transport_play"
+                    android:layout_width="0dp"
+
+                    android:layout_height="match_parent"
+                    android:layout_weight="20"
+                    android:elevation="2dp"
+                    android:onClick="onClicks" />
+
+                <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/transport_loop"
+                    android:layout_width="0dp"
+
+                    android:layout_height="match_parent"
+                    android:layout_weight="20"
+                    android:elevation="2dp"
+                    android:onClick="onClicks" />
+
+                <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/transport_home"
+                    android:layout_width="0dp"
+
+                    android:layout_height="match_parent"
+                    android:layout_weight="20"
+                    android:elevation="2dp"
+                    android:onClick="onClicks" />
+
+                <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/transport_end"
+                    android:layout_width="0dp"
+
+                    android:layout_height="match_parent"
+                    android:layout_weight="20"
+                    android:elevation="2dp"
+                    android:onClick="onClicks" />
+
+                <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/transport_prev_mark"
+                    android:layout_width="0dp"
+
+                    android:layout_height="match_parent"
+                    android:layout_weight="20"
+                    android:elevation="2dp"
+                    android:onClick="onClicks" />
+
+                <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/transport_next_mark"
+                    android:layout_width="0dp"
+
+                    android:layout_height="match_parent"
+                    android:layout_weight="20"
+                    android:elevation="2dp"
+                    android:onClick="onClicks" />
+
+            </android.support.v7.widget.LinearLayoutCompat>
+
+        </android.support.v7.widget.LinearLayoutCompat>
+    </android.support.v7.widget.LinearLayoutCompat>
+</android.support.v7.widget.LinearLayoutCompat>
