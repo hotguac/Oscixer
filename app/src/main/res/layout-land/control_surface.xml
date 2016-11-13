@@ -100,20 +100,22 @@
                 <android.support.v7.widget.AppCompatImageButton
                     android:id="@+id/transport_stop"
                     android:layout_width="0dp"
-
                     android:layout_height="match_parent"
+
                     android:layout_weight="20"
                     android:elevation="2dp"
-                    android:onClick="onClicks" />
+                    android:onClick="onClicks"
+                    android:src="@drawable/stop" />
 
                 <android.support.v7.widget.AppCompatImageButton
                     android:id="@+id/transport_play"
                     android:layout_width="0dp"
-
                     android:layout_height="match_parent"
+
                     android:layout_weight="20"
                     android:elevation="2dp"
-                    android:onClick="onClicks" />
+                    android:onClick="onClicks"
+                    android:src="@drawable/play" />
 
                 <android.support.v7.widget.AppCompatImageButton
                     android:id="@+id/transport_loop"
@@ -131,7 +133,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="20"
                     android:elevation="2dp"
-                    android:onClick="onClicks" />
+                    android:onClick="onClicks"
+                    android:src="@drawable/home" />
 
                 <android.support.v7.widget.AppCompatImageButton
                     android:id="@+id/transport_end"
