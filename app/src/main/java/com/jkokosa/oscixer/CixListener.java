@@ -22,23 +22,13 @@ public class CixListener extends Service {
     public static final int FB_GAIN = 0;
     static final int MSG_REGISTER = 0;
     static final int MSG_GET_STRIP = 1;
+    private final FeedbackTracker fbTracker = new FeedbackTracker();
+    private final Messenger mMessenger = new Messenger((new IncomingHandler(this)));
     private OSCPortIn oscportin;
-    private FeedbackTracker fbTracker = new FeedbackTracker();
-    private Messenger mMessenger = new Messenger((new IncomingHandler(this)));
     private Messenger mActivity = null;
 
-    public void setSocket(DatagramSocket sock) {
+    private void setSocket(DatagramSocket sock) {
         oscportin = new OSCPortIn(sock);
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -50,17 +40,19 @@ public class CixListener extends Service {
      * method for clients
      */
 
-    public void attachListeners() {
+    private void attachListeners() {
         OSCListener listener = new OSCListener() {
             @Override
             public void acceptMessage(Date time, OSCMessage message) {
                 // do something
+                int strip;
+
                 try {
                     String myAddress = message.getAddress();
 
                     switch (myAddress) {
                         case "/strip/gain":
-                            int strip = (int) message.getArguments().get(0);
+                            strip = (int) message.getArguments().get(0);
                             fbTracker.setTrackGain(strip, (float) message.getArguments().get(1));
                             updateStrip(strip);
                             break;
@@ -71,6 +63,10 @@ public class CixListener extends Service {
                         case "/strip/expand":
                             break;
                         case "/strip/name":
+                            strip = (int) message.getArguments().get(0);
+                            fbTracker.setTrackName(strip, (String) message.getArguments().get(1));
+                            //.setTrackGain(strip, (float) message.getArguments().get(1));
+                            updateStrip(strip);
                             break;
                         case "/strip/monitor_input":
                             break;
@@ -124,6 +120,7 @@ public class CixListener extends Service {
         Bundle bundle = new Bundle();
         bundle.putInt("strip", stripID);
         bundle.putFloat("gain", fbTracker.getTrackGain(stripID));
+        bundle.putString("name", fbTracker.getTrackName(stripID));
 
         msg.setData(bundle);
         try {
@@ -135,7 +132,7 @@ public class CixListener extends Service {
     }
 
     static class IncomingHandler extends Handler {
-        CixListener cix;
+        final CixListener cix;
 
         IncomingHandler(CixListener cixL) {
             this.cix = cixL;
