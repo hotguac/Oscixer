@@ -24,11 +24,13 @@ import static com.jkokosa.oscixer.MainActivity.EXTRA_MESSAGE;
 public class ControlActivity extends AppCompatActivity {
     static private DawController controller;
     static private DatagramSocket sock;
-    public TextView textView;
-    private Messenger mMessenger = new Messenger(new ResponseHandler(this));
+    private final Messenger mMessenger = new Messenger(new ResponseHandler(this));
+    private TextView textView;
     /**
      * Defines callbacks for service binding, passed to bindService()
      */
+    private boolean mBound = false;
+
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
@@ -60,6 +62,7 @@ public class ControlActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //setContentView(R.layout.control_surface);
         setContentView(R.layout.control_surface);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
@@ -89,12 +92,40 @@ public class ControlActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!mBound) {
+            Intent intent = new Intent(this, CixListener.class);
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+            mBound = true;
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         // Bind to LocalService
         Intent intent = new Intent(this, CixListener.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        // TODO: unbind on pause and stop and rebind on resume
+        mBound = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
     }
 
     public void onClicks(View view) {
@@ -124,7 +155,7 @@ public class ControlActivity extends AppCompatActivity {
     }
 
     static class ResponseHandler extends Handler {
-        ControlActivity activity;
+        final ControlActivity activity;
 
         ResponseHandler(ControlActivity activity) {
             this.activity = activity;
@@ -136,7 +167,8 @@ public class ControlActivity extends AppCompatActivity {
                 case CixListener.FB_GAIN:
                     int strip = message.getData().getInt("strip", 0);
                     float gain = message.getData().getFloat("gain", -999.0f);
-                    activity.textView.setText(String.format("Strip %d = %f", strip, gain));
+                    String name = message.getData().getString("name", "not found");
+                    activity.textView.setText(String.format("Strip %d-%s = %f", strip, name, gain));
                     break;
             }
         }

@@ -18,7 +18,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ControlActivity" />
+        <activity
+            android:name=".ControlActivity"
+            android:screenOrientation="landscape" />
 
         <service android:name=".CixListener" />
 

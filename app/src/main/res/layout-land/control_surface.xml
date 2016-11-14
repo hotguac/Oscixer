@@ -27,7 +27,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="125"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="4dp">
 
             <android.support.v7.widget.AppCompatImageButton
                 android:id="@+id/strip_up"
@@ -95,7 +96,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="25"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:padding="4dp">
 
                 <android.support.v7.widget.AppCompatImageButton
                     android:id="@+id/transport_stop"
@@ -105,6 +107,7 @@
                     android:layout_weight="20"
                     android:elevation="2dp"
                     android:onClick="onClicks"
+                    android:padding="4dp"
                     android:src="@drawable/stop" />
 
                 <android.support.v7.widget.AppCompatImageButton
@@ -115,6 +118,7 @@
                     android:layout_weight="20"
                     android:elevation="2dp"
                     android:onClick="onClicks"
+                    android:padding="4dp"
                     android:src="@drawable/play" />
 
                 <android.support.v7.widget.AppCompatImageButton
@@ -124,7 +128,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="20"
                     android:elevation="2dp"
-                    android:onClick="onClicks" />
+                    android:onClick="onClicks"
+                    android:padding="4dp" />
 
                 <android.support.v7.widget.AppCompatImageButton
                     android:id="@+id/transport_home"

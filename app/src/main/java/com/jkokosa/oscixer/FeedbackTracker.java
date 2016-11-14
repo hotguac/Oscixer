@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Created by jkokosa on 11/8/16.
  */
 
-public class FeedbackTracker {
+class FeedbackTracker {
     /*
     Audio Tracks
     Midi Tracks
@@ -18,7 +18,7 @@ public class FeedbackTracker {
     Monitor Section
      */
 
-    protected ArrayList<FeedbackChannel> audio_tracks;
+    private final ArrayList<FeedbackChannel> audio_tracks;
 
     public FeedbackTracker() {
         audio_tracks = new ArrayList<>(256);
@@ -35,6 +35,17 @@ public class FeedbackTracker {
         return gain;
     }
 
+    public String getTrackName(int stripID) {
+        String name = "not found";
+
+        for (FeedbackChannel track : audio_tracks) {
+            if (track.getId() == stripID) {
+                name = track.getName();
+            }
+        }
+        return name;
+    }
+
     void setTrackGain(int trackID, float gain) {
         boolean found = false;
         for (FeedbackChannel track : audio_tracks) {
@@ -46,6 +57,21 @@ public class FeedbackTracker {
         if (!found) {
             FeedbackChannel trk = new FeedbackChannel(trackID);
             trk.setGain(gain);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setTrackName(int trackID, String name) {
+        boolean found = false;
+        for (FeedbackChannel track : audio_tracks) {
+            if (track.getId() == trackID) {
+                track.setName(name);
+                found = true;
+            }
+        }
+        if (!found) {
+            FeedbackChannel trk = new FeedbackChannel(trackID);
+            trk.setName(name);
             audio_tracks.add(trk);
         }
     }
@@ -98,11 +124,11 @@ V/listener: /strip/pan_stereo_position*/
             this.name = name;
         }
 
-        protected int getId() {
+        int getId() {
             return id;
         }
 
-        protected void setId(int id) {
+        void setId(int id) {
             this.id = id;
         }
 

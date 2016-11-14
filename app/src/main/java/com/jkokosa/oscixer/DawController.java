@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 /**
  * Created by jkokosa on 11/9/16.
+ * Sends messages to the DAW
  */
 
 class DawController {
@@ -81,6 +82,19 @@ class DawController {
     public void nextMark() {
         try {
             OSCMessage message2 = new OSCMessage("/next_marker");
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
+
+    public void selectTrack(int trackID) {
+        try {
+            ArrayList<Object> moreThingsToSend = new ArrayList<>();
+            moreThingsToSend.add(trackID);
+            moreThingsToSend.add(1);
+            OSCMessage message2 = new OSCMessage("/strip/select", moreThingsToSend);
 
             oscPortOut.send(message2);
         } catch (Exception e) {
