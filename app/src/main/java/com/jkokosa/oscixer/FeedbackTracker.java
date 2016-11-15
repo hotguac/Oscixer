@@ -78,11 +78,11 @@ class FeedbackTracker {
         }
     }
 
-    public void setSelected(int strip, int yn) {
-        if (yn == 1) {
-            selected_track = strip;
-        } else {
+    public void setSelected(int strip, Float yn) {
+        if (yn == 0.0f) {
             selected_track = -1;
+        } else {
+            selected_track = strip;
         }
     }
 
@@ -90,83 +90,422 @@ class FeedbackTracker {
         return selected_track;
     }
 
-    /*/strip/name
-V/listener: /strip/mute
-V/listener: /strip/solo
-V/listener: /strip/monitor_input
-V/listener: /strip/monitor_disk
-V/listener: /strip/recenable
-V/listener: /strip/record_safe
-V/listener: /strip/select
-V/listener: /strip/trimdB
-V/listener: /strip/pan_stereo_position*/
+    public void setMute(int strip, Float mute) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setMute(mute);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setMute(mute);
+            audio_tracks.add(trk);
+        }
+    }
 
+    public void setSolo(int strip, Float solo) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setSolo(solo);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setSolo(solo);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setMonitorInput(int strip, Float yn) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setMonitorInput(yn);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setMonitorInput(yn);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setMonitorDisk(int strip, Float yn) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setMonitorDisk(yn);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setMonitorDisk(yn);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setExpand(int strip, Float yn) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setExpand(yn);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setExpand(yn);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setRecordEnable(int strip, Float yn) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setRecordEnable(yn);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setRecordEnable(yn);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setRecordSafe(int strip, Float yn) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setRecordSafe(yn);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setRecordSafe(yn);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setTrim(int strip, Float trim) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setTrim(trim);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setTrim(trim);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setPSP(int strip, Float psp) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setPSP(psp);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setPSP(psp);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setNumInputs(int strip, Float n_inputs) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setNumInputs(n_inputs);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setNumInputs(n_inputs);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setNumOutputs(int strip, Float n_outputs) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setNumOutputs(n_outputs);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setNumOutputs(n_outputs);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setSoloIso(int strip, Float solo_iso) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setSoloIso(solo_iso);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setSoloIso(solo_iso);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setSoloSafe(int strip, Float solo_safe) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setSoloSafe(solo_safe);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setSoloSafe(solo_safe);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setComment(int strip, String comment) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setComment(comment);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setComment(comment);
+            audio_tracks.add(trk);
+        }
+    }
+
+    public void setPolarity(int strip, Float polarity) {
+        boolean found = false;
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == strip) {
+                track.setPolarity(polarity);
+                found = true;
+            }
+        }
+        if (!found) {
+            ChannelStrip trk = new ChannelStrip(strip);
+            trk.setPolarity(polarity);
+            audio_tracks.add(trk);
+        }
+    }
 }
 
 class ChannelStrip {
-    private final ConcurrentHashMap data;
+    private static final String CS_ID = "id";
+    private static final String CS_NAME = "name";
+    private static final String CS_FADER = "fader";
+    private static final String CS_MUTE = "mute";
+    private static final String CS_SOLO = "solo";
+    private static final String CS_SOLO_ISO = "solo_iso";
+    private static final String CS_SOLO_SAFE = "solo_safe";
+    private static final String CS_COMMENT = "comment";
 
-        /*
-        private int mute;
-        private int solo;
-        private int solo_iso;
-        private int solo_safe;
-        private int ploarity;
-        private int monitor_input;
-        private int monitor_disk;
-        private int recenable;
-        private int record_safe;
-        private int select;
-        private int expand;
-        private float trimdB;
-        private float fader;
-        private float pan_stero_position;
-        private float pan_stero_width;
-        private float send_gain;
-        private float send_fader;
-        private float send_enable;
-        */
+    private static final String CS_POLARITY = "polarity";
+    private static final String CS_MONITOR_INPUT = "monitor_input";
+    private static final String CS_MONITOR_DISK = "monitor_disk";
+    private static final String CS_RECENABLE = "rec_enable";
+    private static final String CS_RECSAFE = "rec_safe";
+    private static final String CS_EXPANDED = "expanded";
+    private static final String CS_TRIM = "trim";
+    private static final String CS_PAN_STERO_POSITION = "pan_stero_position";
+    private static final String CS_PAN_STERO_WIDTH = "pan_stero_width";
+    private static final String CS_SEND_GAIN = "send_gain";
+    private static final String CS_SEND_FADER = "send_fader";
+    private static final String CS_SEND_ENABLE = "send_enable";
+    private static final String CS_NUM_INPUTS = "num_inputs";
+    private static final String CS_NUM_OUTPUTS = "num_outputs";
+
+    private final ConcurrentHashMap data;
 
     public ChannelStrip(int trackID) {
         data = new ConcurrentHashMap<>(32);
 
-        data.put("id", trackID);
+        data.put(CS_ID, trackID);
     }
 
     public String getName() {
-        if (data.containsKey("name")) {
-            return (String) data.get("name");
+        if (data.containsKey(CS_NAME)) {
+            return (String) data.get(CS_NAME);
         } else {
             return "not found";
         }
     }
 
     public void setName(String name) {
-        if (data.containsKey("name")) {
-            data.replace("name", name);
+        if (data.containsKey(CS_NAME)) {
+            data.replace(CS_NAME, name);
         } else {
-            data.put("name", name);
+            data.put(CS_NAME, name);
         }
     }
 
     int getId() {
-        return (int) data.get("id");
+        if (data.containsKey(CS_ID)) {
+            return (int) data.get(CS_ID);
+        } else {
+            return -1;
+        }
     }
 
     float getGain() {
-        if (data.containsKey("gain")) {
-            return (Float) data.get("gain");
+        if (data.containsKey(CS_FADER)) {
+            return (Float) data.get(CS_FADER);
         } else {
             return -999.0f;
         }
     }
 
     void setGain(float gain) {
-        if (data.containsKey("gain")) {
-            data.replace("gain", gain);
+        if (data.containsKey(CS_FADER)) {
+            data.replace(CS_FADER, gain);
         } else {
-            data.put("gain", gain);
+            data.put(CS_FADER, gain);
         }
     }
 
+    public void setMute(Float mute) {
+        if (data.containsKey(CS_MUTE)) {
+            data.replace(CS_MUTE, mute);
+        } else {
+            data.put(CS_MUTE, mute);
+        }
+    }
+
+    public void setSolo(Float solo) {
+        if (data.containsKey(CS_SOLO)) {
+            data.replace(CS_SOLO, solo);
+        } else {
+            data.put(CS_SOLO, solo);
+        }
+    }
+
+    public void setMonitorInput(Float yn) {
+        if (data.containsKey(CS_MONITOR_INPUT)) {
+            data.replace(CS_MONITOR_INPUT, yn);
+        } else {
+            data.put(CS_MONITOR_INPUT, yn);
+        }
+    }
+
+    public void setMonitorDisk(Float yn) {
+        if (data.containsKey(CS_MONITOR_DISK)) {
+            data.replace(CS_MONITOR_DISK, yn);
+        } else {
+            data.put(CS_MONITOR_DISK, yn);
+        }
+    }
+
+    public void setExpand(Float yn) {
+        if (data.containsKey(CS_EXPANDED)) {
+            data.replace(CS_EXPANDED, yn);
+        } else {
+            data.put(CS_EXPANDED, yn);
+        }
+    }
+
+    public void setRecordEnable(Float yn) {
+        if (data.containsKey(CS_RECENABLE)) {
+            data.replace(CS_RECENABLE, yn);
+        } else {
+            data.put(CS_RECENABLE, yn);
+        }
+    }
+
+    public void setRecordSafe(Float yn) {
+        if (data.containsKey(CS_RECSAFE)) {
+            data.replace(CS_RECSAFE, yn);
+        } else {
+            data.put(CS_RECSAFE, yn);
+        }
+    }
+
+    public void setTrim(Float trim) {
+        if (data.containsKey(CS_TRIM)) {
+            data.replace(CS_TRIM, trim);
+        } else {
+            data.put(CS_TRIM, trim);
+        }
+    }
+
+    public void setPSP(Float psp) {
+        if (data.containsKey(CS_PAN_STERO_POSITION)) {
+            data.replace(CS_PAN_STERO_POSITION, psp);
+        } else {
+            data.put(CS_PAN_STERO_POSITION, psp);
+        }
+    }
+
+    public void setNumInputs(Float n_inputs) {
+        if (data.containsKey(CS_NUM_INPUTS)) {
+            data.replace(CS_NUM_INPUTS, n_inputs);
+        } else {
+            data.put(CS_NUM_INPUTS, n_inputs);
+        }
+    }
+
+    public void setNumOutputs(Float n_outputs) {
+        if (data.containsKey(CS_NUM_OUTPUTS)) {
+            data.replace(CS_NUM_OUTPUTS, n_outputs);
+        } else {
+            data.put(CS_NUM_OUTPUTS, n_outputs);
+        }
+    }
+
+    public void setSoloIso(Float solo_iso) {
+        if (data.containsKey(CS_SOLO_ISO)) {
+            data.replace(CS_SOLO_ISO, solo_iso);
+        } else {
+            data.put(CS_SOLO_ISO, solo_iso);
+        }
+    }
+
+    public void setSoloSafe(Float solo_safe) {
+        if (data.containsKey(CS_SOLO_SAFE)) {
+            data.replace(CS_SOLO_SAFE, solo_safe);
+        } else {
+            data.put(CS_SOLO_SAFE, solo_safe);
+        }
+    }
+
+    public void setComment(String comment) {
+        if (data.containsKey(CS_COMMENT)) {
+            data.replace(CS_COMMENT, comment);
+        } else {
+            data.put(CS_COMMENT, comment);
+        }
+    }
+
+    public void setPolarity(Float polarity) {
+        if (data.containsKey(CS_POLARITY)) {
+            data.replace(CS_POLARITY, polarity);
+        } else {
+            data.put(CS_POLARITY, polarity);
+        }
+    }
 }
