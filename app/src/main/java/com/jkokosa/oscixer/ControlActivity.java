@@ -14,6 +14,7 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -146,7 +147,11 @@ public class ControlActivity extends AppCompatActivity {
                 controller.prevMark();
                 break;
             case R.id.transport_next_mark:
-                controller.nextMark();
+                Log.v("Click", "Before");
+                controller.selectTrack(3);
+                Log.v("Click", "After");
+                //controller.moveFader(3, -6.6f);
+                //controller.nextMark();
                 break;
             case R.id.transport_loop:
                 controller.toggle_loop();
@@ -163,12 +168,20 @@ public class ControlActivity extends AppCompatActivity {
 
         @Override
         public void handleMessage(Message message) {
+            int strip;
+            String name;
+
             switch (message.what) {
                 case CixListener.FB_GAIN:
-                    int strip = message.getData().getInt("strip", 0);
+                    strip = message.getData().getInt("strip", 0);
                     float gain = message.getData().getFloat("gain", -999.0f);
-                    String name = message.getData().getString("name", "not found");
+                    name = message.getData().getString("name", "not found");
                     activity.textView.setText(String.format("Strip %d-%s = %f", strip, name, gain));
+                    break;
+                case CixListener.FB_SELECT:
+                    strip = message.getData().getInt("strip", 0);
+                    name = message.getData().getString("name", "not found");
+                    activity.textView.setText(String.format("Strip %d-%s selected", strip, name));
                     break;
             }
         }

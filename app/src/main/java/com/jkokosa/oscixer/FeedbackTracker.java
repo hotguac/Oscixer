@@ -1,6 +1,7 @@
 package com.jkokosa.oscixer;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by jkokosa on 11/8/16.
@@ -18,7 +19,8 @@ class FeedbackTracker {
     Monitor Section
      */
 
-    private final ArrayList<FeedbackChannel> audio_tracks;
+    private final ArrayList<ChannelStrip> audio_tracks;
+    private int selected_track;
 
     public FeedbackTracker() {
         audio_tracks = new ArrayList<>(256);
@@ -27,7 +29,7 @@ class FeedbackTracker {
     public float getTrackGain(int stripID) {
         float gain = -999.99f;
 
-        for (FeedbackChannel track : audio_tracks) {
+        for (ChannelStrip track : audio_tracks) {
             if (track.getId() == stripID) {
                 gain = track.getGain();
             }
@@ -38,7 +40,7 @@ class FeedbackTracker {
     public String getTrackName(int stripID) {
         String name = "not found";
 
-        for (FeedbackChannel track : audio_tracks) {
+        for (ChannelStrip track : audio_tracks) {
             if (track.getId() == stripID) {
                 name = track.getName();
             }
@@ -48,14 +50,14 @@ class FeedbackTracker {
 
     void setTrackGain(int trackID, float gain) {
         boolean found = false;
-        for (FeedbackChannel track : audio_tracks) {
+        for (ChannelStrip track : audio_tracks) {
             if (track.getId() == trackID) {
                 track.setGain(gain);
                 found = true;
             }
         }
         if (!found) {
-            FeedbackChannel trk = new FeedbackChannel(trackID);
+            ChannelStrip trk = new ChannelStrip(trackID);
             trk.setGain(gain);
             audio_tracks.add(trk);
         }
@@ -63,17 +65,29 @@ class FeedbackTracker {
 
     public void setTrackName(int trackID, String name) {
         boolean found = false;
-        for (FeedbackChannel track : audio_tracks) {
+        for (ChannelStrip track : audio_tracks) {
             if (track.getId() == trackID) {
                 track.setName(name);
                 found = true;
             }
         }
         if (!found) {
-            FeedbackChannel trk = new FeedbackChannel(trackID);
+            ChannelStrip trk = new ChannelStrip(trackID);
             trk.setName(name);
             audio_tracks.add(trk);
         }
+    }
+
+    public void setSelected(int strip, int yn) {
+        if (yn == 1) {
+            selected_track = strip;
+        } else {
+            selected_track = -1;
+        }
+    }
+
+    public int getSelected() {
+        return selected_track;
     }
 
     /*/strip/name
@@ -86,10 +100,11 @@ V/listener: /strip/record_safe
 V/listener: /strip/select
 V/listener: /strip/trimdB
 V/listener: /strip/pan_stereo_position*/
-    private class FeedbackChannel {
-        private int id;
-        private String name;
-        private float gain;
+
+}
+
+class ChannelStrip {
+    private final ConcurrentHashMap data;
 
         /*
         private int mute;
@@ -112,34 +127,46 @@ V/listener: /strip/pan_stereo_position*/
         private float send_enable;
         */
 
-        public FeedbackChannel(int trackID) {
-            setId(trackID);
-        }
+    public ChannelStrip(int trackID) {
+        data = new ConcurrentHashMap<>(32);
 
-        public String getName() {
-            return name;
-        }
+        data.put("id", trackID);
+    }
 
-        public void setName(String name) {
-            this.name = name;
+    public String getName() {
+        if (data.containsKey("name")) {
+            return (String) data.get("name");
+        } else {
+            return "not found";
         }
+    }
 
-        int getId() {
-            return id;
+    public void setName(String name) {
+        if (data.containsKey("name")) {
+            data.replace("name", name);
+        } else {
+            data.put("name", name);
         }
+    }
 
-        void setId(int id) {
-            this.id = id;
+    int getId() {
+        return (int) data.get("id");
+    }
+
+    float getGain() {
+        if (data.containsKey("gain")) {
+            return (Float) data.get("gain");
+        } else {
+            return -999.0f;
         }
+    }
 
-        float getGain() {
-            return gain;
+    void setGain(float gain) {
+        if (data.containsKey("gain")) {
+            data.replace("gain", gain);
+        } else {
+            data.put("gain", gain);
         }
-
-        void setGain(float gain) {
-            this.gain = gain;
-        }
-
     }
 
 }

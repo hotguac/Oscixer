@@ -19,9 +19,12 @@ import java.util.Date;
 
 public class CixListener extends Service {
 
-    public static final int FB_GAIN = 0;
+    public static final int FB_SELECT = 0;
+    public static final int FB_GAIN = 1;
+
     static final int MSG_REGISTER = 0;
     static final int MSG_GET_STRIP = 1;
+
     private final FeedbackTracker fbTracker = new FeedbackTracker();
     private final Messenger mMessenger = new Messenger((new IncomingHandler(this)));
     private OSCPortIn oscportin;
@@ -44,8 +47,11 @@ public class CixListener extends Service {
         OSCListener listener = new OSCListener() {
             @Override
             public void acceptMessage(Date time, OSCMessage message) {
-                // do something
+
                 int strip;
+                int yn; // 0-disable / 1-enable
+
+                Log.v("Message: ", message.getAddress() + " " + message.getArguments().toString());
 
                 try {
                     String myAddress = message.getAddress();
@@ -56,17 +62,25 @@ public class CixListener extends Service {
                             fbTracker.setTrackGain(strip, (float) message.getArguments().get(1));
                             updateStrip(strip);
                             break;
+                        case "/strip/name":
+                            strip = (int) message.getArguments().get(0);
+                            fbTracker.setTrackName(strip, (String) message.getArguments().get(1));
+                            updateStrip(strip);
+                            break;
+                        case "/strip/select":
+                            strip = (int) message.getArguments().get(0);
+                            yn = (int) message.getArguments().get(1);
+                            fbTracker.setSelected(strip, yn);
+
+                            updateStrip(strip);
+                            break;
+
+                        /*
                         case "/strip/mute":
                             break;
                         case "/strip/solo":
                             break;
                         case "/strip/expand":
-                            break;
-                        case "/strip/name":
-                            strip = (int) message.getArguments().get(0);
-                            fbTracker.setTrackName(strip, (String) message.getArguments().get(1));
-                            //.setTrackGain(strip, (float) message.getArguments().get(1));
-                            updateStrip(strip);
                             break;
                         case "/strip/monitor_input":
                             break;
@@ -76,15 +90,13 @@ public class CixListener extends Service {
                             break;
                         case "/strip/record_safe":
                             break;
-                        case "/strip/select":
-                            break;
                         case "/strip/trimdB":
                             break;
                         case "/strip/pan_stereo_position":
                             break;
-
+                        */
                         default:
-                            Log.v("listener", message.getAddress());
+                            //Log.v("listener unhandled", message.getAddress());
                             break;
                     }
 
@@ -120,6 +132,21 @@ public class CixListener extends Service {
         Bundle bundle = new Bundle();
         bundle.putInt("strip", stripID);
         bundle.putFloat("gain", fbTracker.getTrackGain(stripID));
+        bundle.putString("name", fbTracker.getTrackName(stripID));
+
+        msg.setData(bundle);
+        try {
+            mActivity.send(msg);
+        } catch (Exception e) {
+            //
+        }
+
+    }
+
+    private void selectStrip(final int stripID) { // TODO: need to communicate back to UI
+        Message msg = Message.obtain(null, FB_SELECT);
+        Bundle bundle = new Bundle();
+        bundle.putInt("strip", stripID);
         bundle.putString("name", fbTracker.getTrackName(stripID));
 
         msg.setData(bundle);

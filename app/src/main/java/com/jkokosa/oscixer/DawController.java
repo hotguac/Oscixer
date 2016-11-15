@@ -102,6 +102,19 @@ class DawController {
         }
     }
 
+    public void moveFader(int trackID, float gain) {
+        try {
+            ArrayList<Object> moreThingsToSend = new ArrayList<>();
+            moreThingsToSend.add(trackID);
+            moreThingsToSend.add(gain);
+            OSCMessage message2 = new OSCMessage("/strip/gain", moreThingsToSend);
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
+
     DatagramSocket attachPorts(String myIP, int port) {
 
         try {
