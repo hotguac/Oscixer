@@ -84,7 +84,7 @@
                     android:id="@+id/feedback_text"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="15" />
+                    android:layout_weight="115" />
 
                 <android.support.v7.widget.AppCompatImageView
                     android:layout_width="match_parent"

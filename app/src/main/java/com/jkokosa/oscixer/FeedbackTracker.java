@@ -18,6 +18,29 @@ class FeedbackTracker {
     Master 2-Bus
     Monitor Section
      */
+    static final String CS_ID = "id";
+    static final String CS_NAME = "name";
+    static final String CS_FADER = "fader";
+    static final String CS_MUTE = "mute";
+    static final String CS_SOLO = "solo";
+    static final String CS_SOLO_ISO = "solo_iso";
+    static final String CS_SOLO_SAFE = "solo_safe";
+    static final String CS_COMMENT = "comment";
+
+    static final String CS_POLARITY = "polarity";
+    static final String CS_MONITOR_INPUT = "monitor_input";
+    static final String CS_MONITOR_DISK = "monitor_disk";
+    static final String CS_RECENABLE = "rec_enable";
+    static final String CS_RECSAFE = "rec_safe";
+    static final String CS_EXPANDED = "expanded";
+    static final String CS_TRIM = "trim";
+    static final String CS_PAN_STERO_POSITION = "pan_stero_position";
+    static final String CS_PAN_STERO_WIDTH = "pan_stero_width";
+    static final String CS_SEND_GAIN = "send_gain";
+    static final String CS_SEND_FADER = "send_fader";
+    static final String CS_SEND_ENABLE = "send_enable";
+    static final String CS_NUM_INPUTS = "num_inputs";
+    static final String CS_NUM_OUTPUTS = "num_outputs";
 
     private final ArrayList<ChannelStrip> audio_tracks;
     private int selected_track;
@@ -26,7 +49,7 @@ class FeedbackTracker {
         audio_tracks = new ArrayList<>(256);
     }
 
-    public float getTrackGain(int stripID) {
+    float getTrackGain(int stripID) {
         float gain = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -37,7 +60,7 @@ class FeedbackTracker {
         return gain;
     }
 
-    public String getTrackName(int stripID) {
+    String getTrackName(int stripID) {
         String name = "not found";
 
         for (ChannelStrip track : audio_tracks) {
@@ -63,7 +86,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setTrackName(int trackID, String name) {
+    void setTrackName(int trackID, String name) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == trackID) {
@@ -78,7 +101,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setSelected(int strip, Float yn) {
+    void setSelected(int strip, Float yn) {
         if (yn == 0.0f) {
             selected_track = -1;
         } else {
@@ -86,11 +109,11 @@ class FeedbackTracker {
         }
     }
 
-    public int getSelected() {
+    int getSelected() {
         return selected_track;
     }
 
-    public void setMute(int strip, Float mute) {
+    void setMute(int strip, Float mute) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -105,7 +128,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setSolo(int strip, Float solo) {
+    void setSolo(int strip, Float solo) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -120,7 +143,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setMonitorInput(int strip, Float yn) {
+    void setMonitorInput(int strip, Float yn) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -135,7 +158,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setMonitorDisk(int strip, Float yn) {
+    void setMonitorDisk(int strip, Float yn) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -150,7 +173,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setExpand(int strip, Float yn) {
+    void setExpand(int strip, Float yn) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -165,7 +188,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setRecordEnable(int strip, Float yn) {
+    void setRecordEnable(int strip, Float yn) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -180,7 +203,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setRecordSafe(int strip, Float yn) {
+    void setRecordSafe(int strip, Float yn) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -195,7 +218,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setTrim(int strip, Float trim) {
+    void setTrim(int strip, Float trim) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -314,198 +337,460 @@ class FeedbackTracker {
             audio_tracks.add(trk);
         }
     }
+
+    public float getMute(int stripID) {
+        float mute = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                mute = track.getMute();
+            }
+        }
+        return mute;
+    }
+
+    public float getSolo(int stripID) {
+        float solo = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                solo = track.getSolo();
+            }
+        }
+        return solo;
+    }
+
+    public String getComment(int stripID) {
+        String name = "unknown";
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                name = track.getComment();
+            }
+        }
+        return name;
+    }
+
+    public float getSoloIso(int stripID) {
+        float solo = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                solo = track.getSoloIso();
+            }
+        }
+        return solo;
+    }
+
+    public float getSoloSafe(int stripID) {
+        float solo = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                solo = track.getSoloSafe();
+            }
+        }
+        return solo;
+    }
+
+    public float getPolarity(int stripID) {
+        float result = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                result = track.getPolarity();
+            }
+        }
+        return result;
+    }
+
+    public float getMonitorInput(int stripID) {
+        float result = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                result = track.getMonitorInput();
+            }
+        }
+        return result;
+    }
+
+    public float getMonitorDisk(int stripID) {
+        float result = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                result = track.getMonitorDisk();
+            }
+        }
+        return result;
+    }
+
+    public float getRecEnable(int stripID) {
+        float result = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                result = track.getRecEnable();
+            }
+        }
+        return result;
+    }
+
+    public float getRecSafe(int stripID) {
+        float result = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                result = track.getRecSafe();
+            }
+        }
+        return result;
+    }
+
+    public float getExpanded(int stripID) {
+        float result = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                result = track.getExpanded();
+            }
+        }
+        return result;
+    }
+
+    public float getTrim(int stripID) {
+        float result = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                result = track.getTrim();
+            }
+        }
+        return result;
+    }
+
+    public float getPanStereoPosition(int stripID) {
+        float result = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                result = track.getPanStereoPosition();
+            }
+        }
+        return result;
+    }
+
+    public float getNumInputs(int stripID) {
+        float result = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                result = track.getNumInputs();
+            }
+        }
+        return result;
+    }
+
+    public float getNumOutputs(int stripID) {
+        float result = -999.99f;
+
+        for (ChannelStrip track : audio_tracks) {
+            if (track.getId() == stripID) {
+                result = track.getNumOutputs();
+            }
+        }
+        return result;
+    }
 }
 
 class ChannelStrip {
-    private static final String CS_ID = "id";
-    private static final String CS_NAME = "name";
-    private static final String CS_FADER = "fader";
-    private static final String CS_MUTE = "mute";
-    private static final String CS_SOLO = "solo";
-    private static final String CS_SOLO_ISO = "solo_iso";
-    private static final String CS_SOLO_SAFE = "solo_safe";
-    private static final String CS_COMMENT = "comment";
-
-    private static final String CS_POLARITY = "polarity";
-    private static final String CS_MONITOR_INPUT = "monitor_input";
-    private static final String CS_MONITOR_DISK = "monitor_disk";
-    private static final String CS_RECENABLE = "rec_enable";
-    private static final String CS_RECSAFE = "rec_safe";
-    private static final String CS_EXPANDED = "expanded";
-    private static final String CS_TRIM = "trim";
-    private static final String CS_PAN_STERO_POSITION = "pan_stero_position";
-    private static final String CS_PAN_STERO_WIDTH = "pan_stero_width";
-    private static final String CS_SEND_GAIN = "send_gain";
-    private static final String CS_SEND_FADER = "send_fader";
-    private static final String CS_SEND_ENABLE = "send_enable";
-    private static final String CS_NUM_INPUTS = "num_inputs";
-    private static final String CS_NUM_OUTPUTS = "num_outputs";
 
     private final ConcurrentHashMap data;
 
     public ChannelStrip(int trackID) {
         data = new ConcurrentHashMap<>(32);
 
-        data.put(CS_ID, trackID);
+        data.put(FeedbackTracker.CS_ID, trackID);
     }
 
     public String getName() {
-        if (data.containsKey(CS_NAME)) {
-            return (String) data.get(CS_NAME);
+        if (data.containsKey(FeedbackTracker.CS_NAME)) {
+            return (String) data.get(FeedbackTracker.CS_NAME);
         } else {
             return "not found";
         }
     }
 
     public void setName(String name) {
-        if (data.containsKey(CS_NAME)) {
-            data.replace(CS_NAME, name);
+        if (data.containsKey(FeedbackTracker.CS_NAME)) {
+            data.replace(FeedbackTracker.CS_NAME, name);
         } else {
-            data.put(CS_NAME, name);
+            data.put(FeedbackTracker.CS_NAME, name);
         }
     }
 
     int getId() {
-        if (data.containsKey(CS_ID)) {
-            return (int) data.get(CS_ID);
+        if (data.containsKey(FeedbackTracker.CS_ID)) {
+            return (int) data.get(FeedbackTracker.CS_ID);
         } else {
             return -1;
         }
     }
 
     float getGain() {
-        if (data.containsKey(CS_FADER)) {
-            return (Float) data.get(CS_FADER);
+        if (data.containsKey(FeedbackTracker.CS_FADER)) {
+            return (Float) data.get(FeedbackTracker.CS_FADER);
         } else {
             return -999.0f;
         }
     }
 
     void setGain(float gain) {
-        if (data.containsKey(CS_FADER)) {
-            data.replace(CS_FADER, gain);
+        if (data.containsKey(FeedbackTracker.CS_FADER)) {
+            data.replace(FeedbackTracker.CS_FADER, gain);
         } else {
-            data.put(CS_FADER, gain);
-        }
-    }
-
-    public void setMute(Float mute) {
-        if (data.containsKey(CS_MUTE)) {
-            data.replace(CS_MUTE, mute);
-        } else {
-            data.put(CS_MUTE, mute);
-        }
-    }
-
-    public void setSolo(Float solo) {
-        if (data.containsKey(CS_SOLO)) {
-            data.replace(CS_SOLO, solo);
-        } else {
-            data.put(CS_SOLO, solo);
-        }
-    }
-
-    public void setMonitorInput(Float yn) {
-        if (data.containsKey(CS_MONITOR_INPUT)) {
-            data.replace(CS_MONITOR_INPUT, yn);
-        } else {
-            data.put(CS_MONITOR_INPUT, yn);
-        }
-    }
-
-    public void setMonitorDisk(Float yn) {
-        if (data.containsKey(CS_MONITOR_DISK)) {
-            data.replace(CS_MONITOR_DISK, yn);
-        } else {
-            data.put(CS_MONITOR_DISK, yn);
+            data.put(FeedbackTracker.CS_FADER, gain);
         }
     }
 
     public void setExpand(Float yn) {
-        if (data.containsKey(CS_EXPANDED)) {
-            data.replace(CS_EXPANDED, yn);
+        if (data.containsKey(FeedbackTracker.CS_EXPANDED)) {
+            data.replace(FeedbackTracker.CS_EXPANDED, yn);
         } else {
-            data.put(CS_EXPANDED, yn);
+            data.put(FeedbackTracker.CS_EXPANDED, yn);
         }
     }
 
     public void setRecordEnable(Float yn) {
-        if (data.containsKey(CS_RECENABLE)) {
-            data.replace(CS_RECENABLE, yn);
+        if (data.containsKey(FeedbackTracker.CS_RECENABLE)) {
+            data.replace(FeedbackTracker.CS_RECENABLE, yn);
         } else {
-            data.put(CS_RECENABLE, yn);
+            data.put(FeedbackTracker.CS_RECENABLE, yn);
         }
     }
 
     public void setRecordSafe(Float yn) {
-        if (data.containsKey(CS_RECSAFE)) {
-            data.replace(CS_RECSAFE, yn);
+        if (data.containsKey(FeedbackTracker.CS_RECSAFE)) {
+            data.replace(FeedbackTracker.CS_RECSAFE, yn);
         } else {
-            data.put(CS_RECSAFE, yn);
-        }
-    }
-
-    public void setTrim(Float trim) {
-        if (data.containsKey(CS_TRIM)) {
-            data.replace(CS_TRIM, trim);
-        } else {
-            data.put(CS_TRIM, trim);
+            data.put(FeedbackTracker.CS_RECSAFE, yn);
         }
     }
 
     public void setPSP(Float psp) {
-        if (data.containsKey(CS_PAN_STERO_POSITION)) {
-            data.replace(CS_PAN_STERO_POSITION, psp);
+        if (data.containsKey(FeedbackTracker.CS_PAN_STERO_POSITION)) {
+            data.replace(FeedbackTracker.CS_PAN_STERO_POSITION, psp);
         } else {
-            data.put(CS_PAN_STERO_POSITION, psp);
+            data.put(FeedbackTracker.CS_PAN_STERO_POSITION, psp);
         }
     }
 
-    public void setNumInputs(Float n_inputs) {
-        if (data.containsKey(CS_NUM_INPUTS)) {
-            data.replace(CS_NUM_INPUTS, n_inputs);
+    public float getMute() {
+        if (data.containsKey(FeedbackTracker.CS_MUTE)) {
+            return (Float) data.get(FeedbackTracker.CS_MUTE);
         } else {
-            data.put(CS_NUM_INPUTS, n_inputs);
+            return -999.0f;
         }
     }
 
-    public void setNumOutputs(Float n_outputs) {
-        if (data.containsKey(CS_NUM_OUTPUTS)) {
-            data.replace(CS_NUM_OUTPUTS, n_outputs);
+    public void setMute(Float mute) {
+        if (data.containsKey(FeedbackTracker.CS_MUTE)) {
+            data.replace(FeedbackTracker.CS_MUTE, mute);
         } else {
-            data.put(CS_NUM_OUTPUTS, n_outputs);
+            data.put(FeedbackTracker.CS_MUTE, mute);
         }
     }
 
-    public void setSoloIso(Float solo_iso) {
-        if (data.containsKey(CS_SOLO_ISO)) {
-            data.replace(CS_SOLO_ISO, solo_iso);
+    public float getSolo() {
+        if (data.containsKey(FeedbackTracker.CS_SOLO)) {
+            return (Float) data.get(FeedbackTracker.CS_SOLO);
         } else {
-            data.put(CS_SOLO_ISO, solo_iso);
+            return -999.0f;
         }
     }
 
-    public void setSoloSafe(Float solo_safe) {
-        if (data.containsKey(CS_SOLO_SAFE)) {
-            data.replace(CS_SOLO_SAFE, solo_safe);
+    public void setSolo(Float solo) {
+        if (data.containsKey(FeedbackTracker.CS_SOLO)) {
+            data.replace(FeedbackTracker.CS_SOLO, solo);
         } else {
-            data.put(CS_SOLO_SAFE, solo_safe);
+            data.put(FeedbackTracker.CS_SOLO, solo);
+        }
+    }
+
+    public String getComment() {
+        if (data.containsKey(FeedbackTracker.CS_COMMENT)) {
+            return (String) data.get(FeedbackTracker.CS_COMMENT);
+        } else {
+            return "";
         }
     }
 
     public void setComment(String comment) {
-        if (data.containsKey(CS_COMMENT)) {
-            data.replace(CS_COMMENT, comment);
+        if (data.containsKey(FeedbackTracker.CS_COMMENT)) {
+            data.replace(FeedbackTracker.CS_COMMENT, comment);
         } else {
-            data.put(CS_COMMENT, comment);
+            data.put(FeedbackTracker.CS_COMMENT, comment);
+        }
+    }
+
+    public float getSoloIso() {
+        if (data.containsKey(FeedbackTracker.CS_SOLO_ISO)) {
+            return (Float) data.get(FeedbackTracker.CS_SOLO_ISO);
+        } else {
+            return -999.0f;
+        }
+    }
+
+    public void setSoloIso(Float solo_iso) {
+        if (data.containsKey(FeedbackTracker.CS_SOLO_ISO)) {
+            data.replace(FeedbackTracker.CS_SOLO_ISO, solo_iso);
+        } else {
+            data.put(FeedbackTracker.CS_SOLO_ISO, solo_iso);
+        }
+    }
+
+    public float getSoloSafe() {
+        if (data.containsKey(FeedbackTracker.CS_SOLO_SAFE)) {
+            return (Float) data.get(FeedbackTracker.CS_SOLO_SAFE);
+        } else {
+            return -999.0f;
+        }
+    }
+
+    public void setSoloSafe(Float solo_safe) {
+        if (data.containsKey(FeedbackTracker.CS_SOLO_SAFE)) {
+            data.replace(FeedbackTracker.CS_SOLO_SAFE, solo_safe);
+        } else {
+            data.put(FeedbackTracker.CS_SOLO_SAFE, solo_safe);
+        }
+    }
+
+    public float getPolarity() {
+        if (data.containsKey(FeedbackTracker.CS_POLARITY)) {
+            return (Float) data.get(FeedbackTracker.CS_POLARITY);
+        } else {
+            return -999.0f;
         }
     }
 
     public void setPolarity(Float polarity) {
-        if (data.containsKey(CS_POLARITY)) {
-            data.replace(CS_POLARITY, polarity);
+        if (data.containsKey(FeedbackTracker.CS_POLARITY)) {
+            data.replace(FeedbackTracker.CS_POLARITY, polarity);
         } else {
-            data.put(CS_POLARITY, polarity);
+            data.put(FeedbackTracker.CS_POLARITY, polarity);
+        }
+    }
+
+    public float getMonitorInput() {
+        if (data.containsKey(FeedbackTracker.CS_MONITOR_INPUT)) {
+            return (Float) data.get(FeedbackTracker.CS_MONITOR_INPUT);
+        } else {
+            return -999.0f;
+        }
+    }
+
+    public void setMonitorInput(Float yn) {
+        if (data.containsKey(FeedbackTracker.CS_MONITOR_INPUT)) {
+            data.replace(FeedbackTracker.CS_MONITOR_INPUT, yn);
+        } else {
+            data.put(FeedbackTracker.CS_MONITOR_INPUT, yn);
+        }
+    }
+
+    public float getMonitorDisk() {
+        if (data.containsKey(FeedbackTracker.CS_MONITOR_DISK)) {
+            return (Float) data.get(FeedbackTracker.CS_MONITOR_DISK);
+        } else {
+            return -999.0f;
+        }
+    }
+
+    public void setMonitorDisk(Float yn) {
+        if (data.containsKey(FeedbackTracker.CS_MONITOR_DISK)) {
+            data.replace(FeedbackTracker.CS_MONITOR_DISK, yn);
+        } else {
+            data.put(FeedbackTracker.CS_MONITOR_DISK, yn);
+        }
+    }
+
+    public float getRecEnable() {
+        if (data.containsKey(FeedbackTracker.CS_RECENABLE)) {
+            return (Float) data.get(FeedbackTracker.CS_RECENABLE);
+        } else {
+            return -999.0f;
+        }
+    }
+
+    public float getRecSafe() {
+        if (data.containsKey(FeedbackTracker.CS_RECSAFE)) {
+            return (Float) data.get(FeedbackTracker.CS_RECSAFE);
+        } else {
+            return -999.0f;
+        }
+    }
+
+    public float getExpanded() {
+        if (data.containsKey(FeedbackTracker.CS_EXPANDED)) {
+            return (Float) data.get(FeedbackTracker.CS_EXPANDED);
+        } else {
+            return -999.0f;
+        }
+    }
+
+    public float getTrim() {
+        if (data.containsKey(FeedbackTracker.CS_TRIM)) {
+            return (Float) data.get(FeedbackTracker.CS_TRIM);
+        } else {
+            return -999.0f;
+        }
+    }
+
+    public void setTrim(Float trim) {
+        if (data.containsKey(FeedbackTracker.CS_TRIM)) {
+            data.replace(FeedbackTracker.CS_TRIM, trim);
+        } else {
+            data.put(FeedbackTracker.CS_TRIM, trim);
+        }
+    }
+
+    public float getPanStereoPosition() {
+        if (data.containsKey(FeedbackTracker.CS_PAN_STERO_POSITION)) {
+            return (Float) data.get(FeedbackTracker.CS_PAN_STERO_POSITION);
+        } else {
+            return -999.0f;
+        }
+    }
+
+    public float getNumInputs() {
+        if (data.containsKey(FeedbackTracker.CS_NUM_INPUTS)) {
+            return (Float) data.get(FeedbackTracker.CS_NUM_INPUTS);
+        } else {
+            return -999.0f;
+        }
+    }
+
+    public void setNumInputs(Float n_inputs) {
+        if (data.containsKey(FeedbackTracker.CS_NUM_INPUTS)) {
+            data.replace(FeedbackTracker.CS_NUM_INPUTS, n_inputs);
+        } else {
+            data.put(FeedbackTracker.CS_NUM_INPUTS, n_inputs);
+        }
+    }
+
+    public float getNumOutputs() {
+        if (data.containsKey(FeedbackTracker.CS_NUM_OUTPUTS)) {
+            return (Float) data.get(FeedbackTracker.CS_NUM_OUTPUTS);
+        } else {
+            return -999.0f;
+        }
+    }
+
+    public void setNumOutputs(Float n_outputs) {
+        if (data.containsKey(FeedbackTracker.CS_NUM_OUTPUTS)) {
+            data.replace(FeedbackTracker.CS_NUM_OUTPUTS, n_outputs);
+        } else {
+            data.put(FeedbackTracker.CS_NUM_OUTPUTS, n_outputs);
         }
     }
 }

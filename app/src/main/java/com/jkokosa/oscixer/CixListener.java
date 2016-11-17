@@ -19,8 +19,9 @@ import java.util.Date;
 
 public class CixListener extends Service {
 
-    public static final int FB_SELECT = 0;
-    public static final int FB_GAIN = 1;
+    public static final int FB_STRIP = 0;
+    public static final int FB_SELECT = 1;
+    public static final int FB_GAIN = 2;
 
     static final int MSG_REGISTER = 0;
     private static final int MSG_GET_STRIP = 1;
@@ -74,7 +75,8 @@ public class CixListener extends Service {
                             fbTracker.setTrackGain(strip, (float) message.getArguments().get(argnum));
                             break;
                         case "/strip/name":
-                        case "/select/name":
+                            // TODO: Select form seems to pass in single space for name - add to Ardour mantis?
+                            //case "/select/name":
                             fbTracker.setTrackName(strip, (String) message.getArguments().get(argnum));
                             break;
                         case "/strip/select":
@@ -177,6 +179,15 @@ public class CixListener extends Service {
             }
         };
 
+        /* Need to handle
+            /loop_toggle [0]
+            /transport_play [1]
+            /transport_stop [0]
+            /rewind [0]
+            /ffwd [0]
+            /master/gain [-14.119568]
+         */
+
         oscportin.addListener("/bank_up", listener);
         oscportin.addListener("/bank_down", listener);
         oscportin.addListener("loop_toggle", listener);
@@ -196,11 +207,27 @@ public class CixListener extends Service {
     }
 
     private void updateStrip(final int stripID) { // TODO: need to communicate back to UI
-        Message msg = Message.obtain(null, FB_GAIN);
+        Message msg = Message.obtain(null, FB_STRIP);
         Bundle bundle = new Bundle();
-        bundle.putInt("strip", stripID);
-        bundle.putFloat("gain", fbTracker.getTrackGain(stripID));
-        bundle.putString("name", fbTracker.getTrackName(stripID));
+        bundle.putInt(FeedbackTracker.CS_ID, stripID);
+        bundle.putString(FeedbackTracker.CS_NAME, fbTracker.getTrackName(stripID));
+        bundle.putFloat(FeedbackTracker.CS_FADER, fbTracker.getTrackGain(stripID));
+        bundle.putFloat(FeedbackTracker.CS_MUTE, fbTracker.getMute(stripID));
+        bundle.putFloat(FeedbackTracker.CS_SOLO, fbTracker.getSolo(stripID));
+        bundle.putFloat(FeedbackTracker.CS_SOLO_ISO, fbTracker.getSoloIso(stripID));
+        bundle.putFloat(FeedbackTracker.CS_SOLO_SAFE, fbTracker.getSoloSafe(stripID));
+        bundle.putString(FeedbackTracker.CS_COMMENT, fbTracker.getComment(stripID));
+
+        bundle.putFloat(FeedbackTracker.CS_POLARITY, fbTracker.getPolarity(stripID));
+        bundle.putFloat(FeedbackTracker.CS_MONITOR_INPUT, fbTracker.getMonitorInput(stripID));
+        bundle.putFloat(FeedbackTracker.CS_MONITOR_DISK, fbTracker.getMonitorDisk(stripID));
+        bundle.putFloat(FeedbackTracker.CS_RECENABLE, fbTracker.getRecEnable(stripID));
+        bundle.putFloat(FeedbackTracker.CS_RECSAFE, fbTracker.getRecSafe(stripID));
+        bundle.putFloat(FeedbackTracker.CS_EXPANDED, fbTracker.getExpanded(stripID));
+        bundle.putFloat(FeedbackTracker.CS_TRIM, fbTracker.getTrim(stripID));
+        bundle.putFloat(FeedbackTracker.CS_PAN_STERO_POSITION, fbTracker.getPanStereoPosition(stripID));
+        bundle.putFloat(FeedbackTracker.CS_NUM_INPUTS, fbTracker.getNumInputs(stripID));
+        bundle.putFloat(FeedbackTracker.CS_NUM_OUTPUTS, fbTracker.getNumOutputs(stripID));
 
         msg.setData(bundle);
         try {
