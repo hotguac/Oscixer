@@ -15,6 +15,8 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -32,6 +34,7 @@ public class ControlActivity extends AppCompatActivity {
      */
     private boolean mBound = false;
     private int strip;
+    private int selected_strip;
     private String name;
     private float fader;
     private float mute;
@@ -87,6 +90,8 @@ public class ControlActivity extends AppCompatActivity {
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+        //myToolbar.inflateMenu(R.menu.cs_menu);
+        getSupportActionBar().openOptionsMenu();
 
         Intent intent = getIntent();
         String msg = intent.getStringExtra(EXTRA_MESSAGE);
@@ -109,6 +114,13 @@ public class ControlActivity extends AppCompatActivity {
         } finally {
             sock = controller.attachPorts(target_host, port);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.cs_menu, menu);
+        return true;
     }
 
     @Override
@@ -167,7 +179,7 @@ public class ControlActivity extends AppCompatActivity {
                 break;
             case R.id.transport_next_mark:
                 Log.v("Click", "Before");
-                controller.selectTrack(3);
+                controller.nextMark();
                 Log.v("Click", "After");
                 //controller.moveFader(3, -6.6f);
                 //controller.nextMark();
@@ -175,8 +187,32 @@ public class ControlActivity extends AppCompatActivity {
             case R.id.transport_loop:
                 controller.toggle_loop();
                 break;
+            case R.id.next_strip:
+                controller.selectTrack(selected_strip + 1);
+                break;
+            case R.id.prev_strip:
+                controller.selectTrack(selected_strip - 1);
+                break;
         }
     }
+
+    public void menuClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.globalRecEnable:
+                controller.globalRecordEnable();
+                break;
+            case R.id.trackRecEnable:
+                if (rec_enable == 0.0f) {
+                    controller.stripRecordEnable(strip);
+                } else {
+                    controller.stripRecordDisable(strip);
+                }
+                break;
+            default:
+                Log.v("Menu", "Unknown resource id");
+        }
+    }
+
 
     class ResponseHandler extends Handler {
         final ControlActivity activity;
@@ -187,6 +223,36 @@ public class ControlActivity extends AppCompatActivity {
 
         @Override
         public void handleMessage(Message message) {
+/*
+Before enable record on Gtr when not the selected track
+
+V/Incoming Message: /rec_enable_toggle [0]
+V/Message:: /rec_enable_toggle [0]
+V/Incoming Message: /rec_enable_toggle [0]
+V/Message:: /rec_enable_toggle [0]
+V/Incoming Message: /record_tally [1]
+V/Message:: /record_tally [1]
+V/Incoming Message: /record_tally [1]
+V/Message:: /record_tally [1]
+V/Incoming Message: /strip/recenable [4, 1.0]
+V/Incoming Message: /strip/recenable [4, 1.0]
+
+After enable before disable record on Gtr when not the selected track
+
+V/Incoming Message: /rec_enable_toggle [0]
+V/Message:: /rec_enable_toggle [0]
+V/Incoming Message: /rec_enable_toggle [0]
+V/Message:: /rec_enable_toggle [0]
+V/Incoming Message: /record_tally [0]
+V/Message:: /record_tally [0]
+V/Incoming Message: /record_tally [0]
+V/Message:: /record_tally [0]
+V/Incoming Message: /strip/recenable [4, 0.0]
+V/Incoming Message: /strip/recenable [4, 0.0]
+
+After disable
+
+ */
 
             switch (message.what) {
                 case CixListener.FB_GAIN:
@@ -196,41 +262,45 @@ public class ControlActivity extends AppCompatActivity {
                     activity.textView.setText(String.format("Strip %d-%s = %f", strip, name, fader));
                     break;
                 case CixListener.FB_SELECT:
-                    strip = message.getData().getInt("strip", 0);
-                    name = message.getData().getString("name", "not found");
-                    activity.textView.setText(String.format("Strip %d-%s selected", strip, name));
+                    selected_strip = message.getData().getInt("strip", 0);
                     break;
                 case CixListener.FB_STRIP:
-                    strip = message.getData().getInt(FeedbackTracker.CS_ID, 0);
-                    name = message.getData().getString(FeedbackTracker.CS_NAME, "not found");
-                    comment = message.getData().getString(FeedbackTracker.CS_COMMENT, "");
-                    mute = message.getData().getFloat(FeedbackTracker.CS_MUTE, 0.0f);
-                    solo = message.getData().getFloat(FeedbackTracker.CS_SOLO, 0.0f);
-                    fader = message.getData().getFloat(FeedbackTracker.CS_FADER, 0.0f);
-                    trim = message.getData().getFloat(FeedbackTracker.CS_TRIM, 0.0f);
-                    solo_iso = message.getData().getFloat(FeedbackTracker.CS_SOLO_ISO, 0.0f);
-                    solo_safe = message.getData().getFloat(FeedbackTracker.CS_SOLO_SAFE, 0.0f);
-                    polarity = message.getData().getFloat(FeedbackTracker.CS_POLARITY, 0.0f);
-                    monitor_input = message.getData().getFloat(FeedbackTracker.CS_MONITOR_INPUT, 0.0f);
-                    monitor_disk = message.getData().getFloat(FeedbackTracker.CS_MONITOR_DISK, 0.0f);
-                    rec_enable = message.getData().getFloat(FeedbackTracker.CS_RECENABLE, 0.0f);
-                    rec_safe = message.getData().getFloat(FeedbackTracker.CS_RECSAFE, 0.0f);
-                    // TODO: findout what expanded is??
-                    expanded = message.getData().getFloat(FeedbackTracker.CS_EXPANDED, 0.0f);
-                    pan_stereo_position = message.getData().getFloat(FeedbackTracker.CS_PAN_STERO_POSITION, 0.0f);
-                    pan_stereo_width = message.getData().getFloat(FeedbackTracker.CS_PAN_STERO_WIDTH, 0.0f);
-                    num_inputs = message.getData().getFloat(FeedbackTracker.CS_NUM_INPUTS, 0.0f);
-                    num_outputs = message.getData().getFloat(FeedbackTracker.CS_NUM_OUTPUTS, 0.0f);
+                    int temp_strip = message.getData().getInt(FeedbackTracker.CS_ID, 0);
+                    if (selected_strip == temp_strip) {
+                        strip = temp_strip;
+                        name = message.getData().getString(FeedbackTracker.CS_NAME, "not found");
+                        comment = message.getData().getString(FeedbackTracker.CS_COMMENT, "");
+                        mute = message.getData().getFloat(FeedbackTracker.CS_MUTE, 0.0f);
+                        solo = message.getData().getFloat(FeedbackTracker.CS_SOLO, 0.0f);
+                        fader = message.getData().getFloat(FeedbackTracker.CS_FADER, 0.0f);
+                        trim = message.getData().getFloat(FeedbackTracker.CS_TRIM, 0.0f);
+                        solo_iso = message.getData().getFloat(FeedbackTracker.CS_SOLO_ISO, 0.0f);
+                        solo_safe = message.getData().getFloat(FeedbackTracker.CS_SOLO_SAFE, 0.0f);
+                        polarity = message.getData().getFloat(FeedbackTracker.CS_POLARITY, 0.0f);
+                        monitor_input = message.getData().getFloat(FeedbackTracker.CS_MONITOR_INPUT, 0.0f);
+                        monitor_disk = message.getData().getFloat(FeedbackTracker.CS_MONITOR_DISK, 0.0f);
+                        rec_enable = message.getData().getFloat(FeedbackTracker.CS_RECENABLE, 0.0f);
+                        rec_safe = message.getData().getFloat(FeedbackTracker.CS_RECSAFE, 0.0f);
+                        // TODO: findout what expanded is??
+                        expanded = message.getData().getFloat(FeedbackTracker.CS_EXPANDED, 0.0f);
+                        pan_stereo_position = message.getData().getFloat(FeedbackTracker.CS_PAN_STERO_POSITION, 0.0f);
+                        pan_stereo_width = message.getData().getFloat(FeedbackTracker.CS_PAN_STERO_WIDTH, 0.0f);
+                        num_inputs = message.getData().getFloat(FeedbackTracker.CS_NUM_INPUTS, 0.0f);
+                        num_outputs = message.getData().getFloat(FeedbackTracker.CS_NUM_OUTPUTS, 0.0f);
 
-                    String state = String.format("Id = %d\tName = %s\nMute = %f\tTrim = %f\nFader = %f\tComment = '%s'\n" +
-                                    "Solo = %f\tSolo_Iso = %f\nSolo_Safe = %f\tPolarity = %f\nMonitor_input = %f\t" +
-                                    "Monitor_disk = %f\nRec_enable = %f\tRec_Safe = %f\nExpanded = %f\tPan_Position = %f\n" +
-                                    "Pan_Width = %f\tNum_Inputs = %f\nNum_Outputs = %f\n",
-                            strip, name, mute, trim, fader, comment,
-                            solo, solo_iso, solo_safe, polarity, monitor_input,
-                            monitor_disk, rec_enable, rec_safe, expanded, pan_stereo_position, pan_stereo_width,
-                            num_inputs, num_outputs);
-                    activity.textView.setText(state);
+                        String state = String.format("Id = %d\tName = %s\nMute = %f\tTrim = %f\nFader = %f\tComment = '%s'\n" +
+                                        "Solo = %f\tSolo_Iso = %f\nSolo_Safe = %f\tPolarity = %f\nMonitor_input = %f\t" +
+                                        "Monitor_disk = %f\nRec_enable = %f\tRec_Safe = %f\nExpanded = %f\tPan_Position = %f\n" +
+                                        "Pan_Width = %f\tNum_Inputs = %f\nNum_Outputs = %f\n",
+                                strip, name, mute, trim, fader, comment,
+                                solo, solo_iso, solo_safe, polarity, monitor_input,
+                                monitor_disk, rec_enable, rec_safe, expanded, pan_stereo_position, pan_stereo_width,
+                                num_inputs, num_outputs);
+                        activity.textView.setText(state);
+
+                        Toolbar toolbar = (Toolbar) this.activity.findViewById(R.id.my_toolbar);
+                        toolbar.setSubtitle(name);
+                    }
                     break;
             }
         }

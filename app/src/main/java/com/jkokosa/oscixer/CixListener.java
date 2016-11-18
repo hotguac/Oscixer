@@ -58,9 +58,9 @@ public class CixListener extends Service {
                 Float psp;
 
                 //Log.v("Message: ", message.getAddress() + " " + message.getArguments().toString());
-
                 try {
                     String myAddress = message.getAddress();
+                    //Log.v("Incoming Message", message.getAddress() + " " + message.getArguments().toString());
                     if (myAddress.startsWith("/strip/")) {
                         strip = (int) message.getArguments().get(0);
                         argnum = 1;
@@ -76,12 +76,20 @@ public class CixListener extends Service {
                             break;
                         case "/strip/name":
                             // TODO: Select form seems to pass in single space for name - add to Ardour mantis?
-                            //case "/select/name":
-                            fbTracker.setTrackName(strip, (String) message.getArguments().get(argnum));
+                        case "/select/name":
+                            String temp_name = (String) message.getArguments().get(argnum);
+                            if (!temp_name.equals("")) {
+                                fbTracker.setTrackName(strip, temp_name);
+                            }
                             break;
                         case "/strip/select":
+                            Log.v("Incoming Message", message.getAddress() + " " + message.getArguments().toString());
+
                             Float select = (Float) message.getArguments().get(argnum);
                             fbTracker.setSelected(strip, select);
+                            if (select == 1.0f) {
+                                selectStrip(strip);
+                            }
                             break;
                         case "/strip/mute":
                         case "/select/mute":
@@ -190,19 +198,22 @@ public class CixListener extends Service {
 
         oscportin.addListener("/bank_up", listener);
         oscportin.addListener("/bank_down", listener);
-        oscportin.addListener("loop_toggle", listener);
-        oscportin.addListener("transport_play", listener);
-        oscportin.addListener("transport_stop", listener);
+        oscportin.addListener("/loop_toggle", listener);
+        oscportin.addListener("/transport_play", listener);
+        oscportin.addListener("/transport_stop", listener);
         oscportin.addListener("/rewind", listener);
         oscportin.addListener("/ffwd", listener);
         oscportin.addListener("/session_name", listener);
         oscportin.addListener("/record_tally", listener);
+        oscportin.addListener("/record_enabled", listener);
         oscportin.addListener("/cancel_all_solos", listener);
         oscportin.addListener("/rec_enable_toggle", listener);
         oscportin.addListener("/strip/*", listener);
         oscportin.addListener("/select/*", listener);
         oscportin.addListener("/master/*", listener);
         oscportin.addListener("/monitor/*", listener);
+        oscportin.addListener("/*/*", listener);
+        oscportin.addListener("/*", listener);
         oscportin.startListening();
     }
 
@@ -242,7 +253,6 @@ public class CixListener extends Service {
         Message msg = Message.obtain(null, FB_SELECT);
         Bundle bundle = new Bundle();
         bundle.putInt("strip", stripID);
-        bundle.putString("name", fbTracker.getTrackName(stripID));
 
         msg.setData(bundle);
         try {

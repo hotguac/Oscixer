@@ -89,6 +89,31 @@ class DawController {
         }
     }
 
+    public void globalRecordEnable() {
+        try {
+            ArrayList<Object> moreThingsToSend = new ArrayList<>();
+            moreThingsToSend.add(1.0f);
+            OSCMessage message2 = new OSCMessage("/rec_enable_toggle", moreThingsToSend);
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
+
+    public void stripRecordEnable(int strip) {
+        try {
+            ArrayList<Object> moreThingsToSend = new ArrayList<>();
+            moreThingsToSend.add(strip);
+            moreThingsToSend.add(1.0f);
+            OSCMessage message2 = new OSCMessage("/strip/recenable", moreThingsToSend);
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
+
     public void selectTrack(int trackID) {
         try {
             ArrayList<Object> moreThingsToSend = new ArrayList<>();
@@ -146,4 +171,16 @@ class DawController {
         }
     }
 
+    public void stripRecordDisable(int strip) {
+        try {
+            ArrayList<Object> moreThingsToSend = new ArrayList<>();
+            moreThingsToSend.add(strip);
+            moreThingsToSend.add(0.0f);
+            OSCMessage message2 = new OSCMessage("/strip/recenable", moreThingsToSend);
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
 }

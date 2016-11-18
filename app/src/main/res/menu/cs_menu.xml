@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/trackRecEnable"
+        android:icon="@drawable/track_rec_disabled"
+        android:onClick="menuClick"
+        android:title="trackRecordEnable"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/globalRecEnable"
+        android:icon="@drawable/global_rec_disabled"
+        android:onClick="menuClick"
+        android:title="GlobalRecEnable"
+        app:showAsAction="ifRoom" />
+</menu>
