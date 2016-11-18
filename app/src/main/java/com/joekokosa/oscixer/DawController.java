@@ -1,4 +1,4 @@
-package com.jkokosa.oscixer;
+package com.joekokosa.oscixer;
 
 import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPortOut;
@@ -11,7 +11,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 /**
- * Created by jkokosa on 11/9/16.
+ * Created by com.joekokosa on 11/9/16.
  * Sends messages to the DAW
  */
 

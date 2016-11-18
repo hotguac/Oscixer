@@ -1,4 +1,4 @@
-package com.jkokosa.oscixer;
+package com.joekokosa.oscixer;
 
 import org.junit.Test;
 

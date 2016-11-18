@@ -1,4 +1,4 @@
-package com.jkokosa.oscixer;
+package com.joekokosa.oscixer;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,7 +10,7 @@ public class PrefsFragment extends PreferenceFragment implements SharedPreferenc
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.preferences);
+        addPreferencesFromResource(com.joekokosa.oscixer.R.xml.preferences);
 
         EditTextPreference editText = (EditTextPreference) findPreference("target_host");
         editText.setSummary(editText.getText());

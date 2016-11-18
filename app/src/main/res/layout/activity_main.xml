@@ -31,7 +31,7 @@
 
         <fragment
             android:id="@+id/prefers"
-            android:name="com.jkokosa.oscixer.PrefsFragment"
+            android:name="com.joekokosa.oscixer.PrefsFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:layout="@layout/fragment_prefs" />

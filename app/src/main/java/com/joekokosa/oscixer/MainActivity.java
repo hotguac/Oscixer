@@ -1,4 +1,4 @@
-package com.jkokosa.oscixer;
+package com.joekokosa.oscixer;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,12 +8,12 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
-    public final static String EXTRA_MESSAGE = "com.jkokosa.oscixer.MESSAGE";
+    public final static String EXTRA_MESSAGE = "com.com.joekokosa.oscixer.MESSAGE";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        setContentView(R.layout.activity_main);
+        PreferenceManager.setDefaultValues(this, com.joekokosa.oscixer.R.xml.preferences, false);
+        setContentView(com.joekokosa.oscixer.R.layout.activity_main);
     }
 
     /**

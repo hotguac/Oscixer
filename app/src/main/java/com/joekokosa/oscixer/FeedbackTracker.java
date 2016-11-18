@@ -1,10 +1,10 @@
-package com.jkokosa.oscixer;
+package com.joekokosa.oscixer;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by jkokosa on 11/8/16.
+ * Created by com.joekokosa on 11/8/16.
  */
 
 class FeedbackTracker {
