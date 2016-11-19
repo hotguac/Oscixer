@@ -13,6 +13,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.ActionMenuItemView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -22,6 +23,9 @@ import android.widget.TextView;
 
 import java.net.DatagramSocket;
 
+import static com.joekokosa.oscixer.FeedbackTracker.CS_FADER;
+import static com.joekokosa.oscixer.FeedbackTracker.CS_ID;
+import static com.joekokosa.oscixer.FeedbackTracker.CS_NAME;
 import static com.joekokosa.oscixer.MainActivity.EXTRA_MESSAGE;
 
 public class ControlActivity extends AppCompatActivity {
@@ -69,9 +73,9 @@ public class ControlActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         //setContentView(R.layout.control_surface);
-        setContentView(com.joekokosa.oscixer.R.layout.control_surface);
+        setContentView(R.layout.control_surface);
 
-        Toolbar myToolbar = (Toolbar) findViewById(com.joekokosa.oscixer.R.id.my_toolbar);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
         //myToolbar.inflateMenu(R.menu.cs_menu);
         getSupportActionBar().openOptionsMenu();
@@ -79,7 +83,7 @@ public class ControlActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String msg = intent.getStringExtra(EXTRA_MESSAGE);
 
-        textView = (TextView) findViewById(com.joekokosa.oscixer.R.id.feedback_text);
+        textView = (TextView) findViewById(R.id.feedback_text);
         textView.setText(msg);
 
         controller = new DawController();
@@ -145,35 +149,31 @@ public class ControlActivity extends AppCompatActivity {
 
     public void onClicks(View view) {
         switch (view.getId()) {
-            case com.joekokosa.oscixer.R.id.transport_play:
+            case R.id.transport_play:
                 controller.startTransport();
                 break;
-            case com.joekokosa.oscixer.R.id.transport_stop:
+            case R.id.transport_stop:
                 controller.stopTransport();
                 break;
-            case com.joekokosa.oscixer.R.id.transport_home:
+            case R.id.transport_home:
                 controller.goHome();
                 break;
-            case com.joekokosa.oscixer.R.id.transport_end:
+            case R.id.transport_end:
                 controller.goEnd();
                 break;
-            case com.joekokosa.oscixer.R.id.transport_prev_mark:
+            case R.id.transport_prev_mark:
                 controller.prevMark();
                 break;
-            case com.joekokosa.oscixer.R.id.transport_next_mark:
-                Log.v("Click", "Before");
+            case R.id.transport_next_mark:
                 controller.nextMark();
-                Log.v("Click", "After");
-                //controller.moveFader(3, -6.6f);
-                //controller.nextMark();
                 break;
-            case com.joekokosa.oscixer.R.id.transport_loop:
+            case R.id.transport_loop:
                 controller.toggle_loop();
                 break;
-            case com.joekokosa.oscixer.R.id.next_strip:
+            case R.id.next_strip:
                 controller.selectTrack(selected_strip + 1);
                 break;
-            case com.joekokosa.oscixer.R.id.prev_strip:
+            case R.id.prev_strip:
                 controller.selectTrack(selected_strip - 1);
                 break;
         }
@@ -181,10 +181,10 @@ public class ControlActivity extends AppCompatActivity {
 
     public void menuClick(MenuItem item) {
         switch (item.getItemId()) {
-            case com.joekokosa.oscixer.R.id.globalRecEnable:
+            case R.id.globalRecEnable:
                 controller.globalRecordEnable();
                 break;
-            case com.joekokosa.oscixer.R.id.trackRecEnable:
+            case R.id.trackRecEnable:
                 if (rec_enable == 0.0f) {
                     controller.stripRecordEnable(strip);
                 } else {
@@ -199,6 +199,9 @@ public class ControlActivity extends AppCompatActivity {
 
     class ResponseHandler extends Handler {
         final ControlActivity activity;
+        float saved_trk_rec_enable = 0.0f;
+        int saved_global_rec_enable;
+        int temp_strip;
 
         ResponseHandler(ControlActivity activity) {
             this.activity = activity;
@@ -206,49 +209,56 @@ public class ControlActivity extends AppCompatActivity {
 
         @Override
         public void handleMessage(Message message) {
-/*
-Before enable record on Gtr when not the selected track
-
-V/Incoming Message: /rec_enable_toggle [0]
-V/Message:: /rec_enable_toggle [0]
-V/Incoming Message: /rec_enable_toggle [0]
-V/Message:: /rec_enable_toggle [0]
-V/Incoming Message: /record_tally [1]
-V/Message:: /record_tally [1]
-V/Incoming Message: /record_tally [1]
-V/Message:: /record_tally [1]
-V/Incoming Message: /strip/recenable [4, 1.0]
-V/Incoming Message: /strip/recenable [4, 1.0]
-
-After enable before disable record on Gtr when not the selected track
-
-V/Incoming Message: /rec_enable_toggle [0]
-V/Message:: /rec_enable_toggle [0]
-V/Incoming Message: /rec_enable_toggle [0]
-V/Message:: /rec_enable_toggle [0]
-V/Incoming Message: /record_tally [0]
-V/Message:: /record_tally [0]
-V/Incoming Message: /record_tally [0]
-V/Message:: /record_tally [0]
-V/Incoming Message: /strip/recenable [4, 0.0]
-V/Incoming Message: /strip/recenable [4, 0.0]
-
-After disable
-
- */
-
             switch (message.what) {
                 case CixListener.FB_GAIN:
-                    strip = message.getData().getInt("strip", 0);
-                    float fader = message.getData().getFloat("gain", -999.0f);
-                    String name = message.getData().getString("name", "not found");
+                    strip = message.getData().getInt(CS_ID, 0);
+                    float fader = message.getData().getFloat(CS_FADER, -999.0f);
+                    String name = message.getData().getString(CS_NAME, "not found");
                     activity.textView.setText(String.format("Strip %d-%s = %f", strip, name, fader));
                     break;
                 case CixListener.FB_SELECT:
-                    selected_strip = message.getData().getInt("strip", 0);
+                    selected_strip = message.getData().getInt(CS_ID, 0);
+                    break;
+                case CixListener.FB_TRACK_RECENABLE:
+                    temp_strip = message.getData().getInt(CS_ID, 0);
+                    if (selected_strip == temp_strip) {
+                        float temp_rec_enable = message.getData().getFloat(FeedbackTracker.CS_TRACK_RECENABLE, 0.0f);
+                        if (temp_rec_enable != saved_trk_rec_enable) {
+                            try {
+                                ActionMenuItemView trk_enable = (ActionMenuItemView) findViewById(R.id.trackRecEnable);
+                                if (temp_rec_enable == 0.0f) {
+                                    //trk_enable.setIcon(R.drawable.track_rec_disabled);
+                                    trk_enable.getItemData().setIcon(R.drawable.track_rec_disabled);
+                                } else {
+                                    trk_enable.getItemData().setIcon(R.drawable.track_rec_enabled);
+                                }
+                            } catch (Exception e) {
+                                Log.e("Recenable", e.getMessage());
+                            }
+                        }
+                        saved_trk_rec_enable = temp_rec_enable;
+                    }
+                    break;
+                case CixListener.FB_GLOBAL_RECENABLE:
+                    int temp_global_rec_enable = message.arg1;
+                    if (temp_global_rec_enable != saved_global_rec_enable) {
+                        try {
+                            ActionMenuItemView global_enable = (ActionMenuItemView) findViewById(R.id.globalRecEnable);
+                            if (temp_global_rec_enable == 0) {
+                                //trk_enable.setIcon(R.drawable.track_rec_disabled);
+                                global_enable.getItemData().setIcon(R.drawable.global_rec_disabled);
+                            } else {
+                                global_enable.getItemData().setIcon(R.drawable.global_rec_enabled);
+                            }
+                        } catch (Exception e) {
+                            Log.e("Recenable", e.getMessage());
+                        }
+                    }
+                    saved_global_rec_enable = temp_global_rec_enable;
+
                     break;
                 case CixListener.FB_STRIP:
-                    int temp_strip = message.getData().getInt(FeedbackTracker.CS_ID, 0);
+                    temp_strip = message.getData().getInt(CS_ID, 0);
                     if (selected_strip == temp_strip) {
                         strip = temp_strip;
                         name = message.getData().getString(FeedbackTracker.CS_NAME, "not found");
@@ -262,7 +272,7 @@ After disable
                         float polarity = message.getData().getFloat(FeedbackTracker.CS_POLARITY, 0.0f);
                         float monitor_input = message.getData().getFloat(FeedbackTracker.CS_MONITOR_INPUT, 0.0f);
                         float monitor_disk = message.getData().getFloat(FeedbackTracker.CS_MONITOR_DISK, 0.0f);
-                        rec_enable = message.getData().getFloat(FeedbackTracker.CS_RECENABLE, 0.0f);
+                        rec_enable = message.getData().getFloat(FeedbackTracker.CS_TRACK_RECENABLE, 0.0f);
                         float rec_safe = message.getData().getFloat(FeedbackTracker.CS_RECSAFE, 0.0f);
                         // TODO: findout what expanded is??
                         float expanded = message.getData().getFloat(FeedbackTracker.CS_EXPANDED, 0.0f);
@@ -271,18 +281,22 @@ After disable
                         float num_inputs = message.getData().getFloat(FeedbackTracker.CS_NUM_INPUTS, 0.0f);
                         float num_outputs = message.getData().getFloat(FeedbackTracker.CS_NUM_OUTPUTS, 0.0f);
 
-                        String state = String.format("Id = %d\tName = %s\nMute = %f\tTrim = %f\nFader = %f\tComment = '%s'\n" +
-                                        "Solo = %f\tSolo_Iso = %f\nSolo_Safe = %f\tPolarity = %f\nMonitor_input = %f\t" +
-                                        "Monitor_disk = %f\nRec_enable = %f\tRec_Safe = %f\nExpanded = %f\tPan_Position = %f\n" +
-                                        "Pan_Width = %f\tNum_Inputs = %f\nNum_Outputs = %f\n",
-                                strip, name, mute, trim, fader, comment,
-                                solo, solo_iso, solo_safe, polarity, monitor_input,
-                                monitor_disk, rec_enable, rec_safe, expanded, pan_stereo_position, pan_stereo_width,
-                                num_inputs, num_outputs);
-                        activity.textView.setText(state);
+                        try {
+                            String state = String.format("Id = %d\tMute = %f\tTrim = %f\nFader = %f\tComment = '%s'\n" +
+                                            "Solo = %f\tSolo_Iso = %f\nSolo_Safe = %f\tPolarity = %f\nMonitor_input = %f\t" +
+                                            "Monitor_disk = %f\nRec_Safe = %f\nPan_Position = %f\n" +
+                                            "Pan_Width = %f\tNum_Inputs = %f\nNum_Outputs = %f\n",
+                                    strip, mute, trim, fader, comment,
+                                    solo, solo_iso, solo_safe, polarity, monitor_input,
+                                    monitor_disk, rec_safe, pan_stereo_position, pan_stereo_width,
+                                    num_inputs, num_outputs);
+                            activity.textView.setText(state);
 
-                        Toolbar toolbar = (Toolbar) this.activity.findViewById(com.joekokosa.oscixer.R.id.my_toolbar);
-                        toolbar.setSubtitle(name);
+                            Toolbar toolbar = (Toolbar) this.activity.findViewById(R.id.my_toolbar);
+                            toolbar.setTitle("Oscixer  -  " + name);
+                        } catch (Exception e) {
+                            Log.e("STRIP", e.getMessage());
+                        }
                     }
                     break;
             }

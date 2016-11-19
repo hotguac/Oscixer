@@ -30,7 +30,8 @@ class FeedbackTracker {
     static final String CS_POLARITY = "polarity";
     static final String CS_MONITOR_INPUT = "monitor_input";
     static final String CS_MONITOR_DISK = "monitor_disk";
-    static final String CS_RECENABLE = "rec_enable";
+    static final String CS_TRACK_RECENABLE = "rec_enable";
+    static final String CS_GLOBAL_RECENABLE = "rec_enable";
     static final String CS_RECSAFE = "rec_safe";
     static final String CS_EXPANDED = "expanded";
     static final String CS_TRIM = "trim";
@@ -233,7 +234,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setPSP(int strip, Float psp) {
+    void setPSP(int strip, Float psp) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -248,7 +249,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setNumInputs(int strip, Float n_inputs) {
+    void setNumInputs(int strip, Float n_inputs) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -263,7 +264,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setNumOutputs(int strip, Float n_outputs) {
+    void setNumOutputs(int strip, Float n_outputs) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -278,7 +279,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setSoloIso(int strip, Float solo_iso) {
+    void setSoloIso(int strip, Float solo_iso) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -293,7 +294,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setSoloSafe(int strip, Float solo_safe) {
+    void setSoloSafe(int strip, Float solo_safe) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -308,7 +309,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setComment(int strip, String comment) {
+    void setComment(int strip, String comment) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -323,7 +324,7 @@ class FeedbackTracker {
         }
     }
 
-    public void setPolarity(int strip, Float polarity) {
+    void setPolarity(int strip, Float polarity) {
         boolean found = false;
         for (ChannelStrip track : audio_tracks) {
             if (track.getId() == strip) {
@@ -338,7 +339,7 @@ class FeedbackTracker {
         }
     }
 
-    public float getMute(int stripID) {
+    float getMute(int stripID) {
         float mute = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -349,7 +350,7 @@ class FeedbackTracker {
         return mute;
     }
 
-    public float getSolo(int stripID) {
+    float getSolo(int stripID) {
         float solo = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -360,7 +361,7 @@ class FeedbackTracker {
         return solo;
     }
 
-    public String getComment(int stripID) {
+    String getComment(int stripID) {
         String name = "unknown";
 
         for (ChannelStrip track : audio_tracks) {
@@ -371,7 +372,7 @@ class FeedbackTracker {
         return name;
     }
 
-    public float getSoloIso(int stripID) {
+    float getSoloIso(int stripID) {
         float solo = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -382,7 +383,7 @@ class FeedbackTracker {
         return solo;
     }
 
-    public float getSoloSafe(int stripID) {
+    float getSoloSafe(int stripID) {
         float solo = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -393,7 +394,7 @@ class FeedbackTracker {
         return solo;
     }
 
-    public float getPolarity(int stripID) {
+    float getPolarity(int stripID) {
         float result = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -404,7 +405,7 @@ class FeedbackTracker {
         return result;
     }
 
-    public float getMonitorInput(int stripID) {
+    float getMonitorInput(int stripID) {
         float result = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -415,7 +416,7 @@ class FeedbackTracker {
         return result;
     }
 
-    public float getMonitorDisk(int stripID) {
+    float getMonitorDisk(int stripID) {
         float result = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -426,7 +427,7 @@ class FeedbackTracker {
         return result;
     }
 
-    public float getRecEnable(int stripID) {
+    float getRecEnable(int stripID) {
         float result = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -437,7 +438,7 @@ class FeedbackTracker {
         return result;
     }
 
-    public float getRecSafe(int stripID) {
+    float getRecSafe(int stripID) {
         float result = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -448,7 +449,7 @@ class FeedbackTracker {
         return result;
     }
 
-    public float getExpanded(int stripID) {
+    float getExpanded(int stripID) {
         float result = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -459,7 +460,7 @@ class FeedbackTracker {
         return result;
     }
 
-    public float getTrim(int stripID) {
+    float getTrim(int stripID) {
         float result = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -470,7 +471,7 @@ class FeedbackTracker {
         return result;
     }
 
-    public float getPanStereoPosition(int stripID) {
+    float getPanStereoPosition(int stripID) {
         float result = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -481,7 +482,7 @@ class FeedbackTracker {
         return result;
     }
 
-    public float getNumInputs(int stripID) {
+    float getNumInputs(int stripID) {
         float result = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -492,7 +493,7 @@ class FeedbackTracker {
         return result;
     }
 
-    public float getNumOutputs(int stripID) {
+    float getNumOutputs(int stripID) {
         float result = -999.99f;
 
         for (ChannelStrip track : audio_tracks) {
@@ -508,7 +509,7 @@ class ChannelStrip {
 
     private final ConcurrentHashMap data;
 
-    public ChannelStrip(int trackID) {
+    ChannelStrip(int trackID) {
         data = new ConcurrentHashMap<>(32);
 
         data.put(FeedbackTracker.CS_ID, trackID);
@@ -554,7 +555,7 @@ class ChannelStrip {
         }
     }
 
-    public void setExpand(Float yn) {
+    void setExpand(Float yn) {
         if (data.containsKey(FeedbackTracker.CS_EXPANDED)) {
             data.replace(FeedbackTracker.CS_EXPANDED, yn);
         } else {
@@ -562,15 +563,15 @@ class ChannelStrip {
         }
     }
 
-    public void setRecordEnable(Float yn) {
-        if (data.containsKey(FeedbackTracker.CS_RECENABLE)) {
-            data.replace(FeedbackTracker.CS_RECENABLE, yn);
+    void setRecordEnable(Float yn) {
+        if (data.containsKey(FeedbackTracker.CS_TRACK_RECENABLE)) {
+            data.replace(FeedbackTracker.CS_TRACK_RECENABLE, yn);
         } else {
-            data.put(FeedbackTracker.CS_RECENABLE, yn);
+            data.put(FeedbackTracker.CS_TRACK_RECENABLE, yn);
         }
     }
 
-    public void setRecordSafe(Float yn) {
+    void setRecordSafe(Float yn) {
         if (data.containsKey(FeedbackTracker.CS_RECSAFE)) {
             data.replace(FeedbackTracker.CS_RECSAFE, yn);
         } else {
@@ -578,7 +579,7 @@ class ChannelStrip {
         }
     }
 
-    public void setPSP(Float psp) {
+    void setPSP(Float psp) {
         if (data.containsKey(FeedbackTracker.CS_PAN_STERO_POSITION)) {
             data.replace(FeedbackTracker.CS_PAN_STERO_POSITION, psp);
         } else {
@@ -586,7 +587,7 @@ class ChannelStrip {
         }
     }
 
-    public float getMute() {
+    float getMute() {
         if (data.containsKey(FeedbackTracker.CS_MUTE)) {
             return (Float) data.get(FeedbackTracker.CS_MUTE);
         } else {
@@ -594,7 +595,7 @@ class ChannelStrip {
         }
     }
 
-    public void setMute(Float mute) {
+    void setMute(Float mute) {
         if (data.containsKey(FeedbackTracker.CS_MUTE)) {
             data.replace(FeedbackTracker.CS_MUTE, mute);
         } else {
@@ -602,7 +603,7 @@ class ChannelStrip {
         }
     }
 
-    public float getSolo() {
+    float getSolo() {
         if (data.containsKey(FeedbackTracker.CS_SOLO)) {
             return (Float) data.get(FeedbackTracker.CS_SOLO);
         } else {
@@ -610,7 +611,7 @@ class ChannelStrip {
         }
     }
 
-    public void setSolo(Float solo) {
+    void setSolo(Float solo) {
         if (data.containsKey(FeedbackTracker.CS_SOLO)) {
             data.replace(FeedbackTracker.CS_SOLO, solo);
         } else {
@@ -618,7 +619,7 @@ class ChannelStrip {
         }
     }
 
-    public String getComment() {
+    String getComment() {
         if (data.containsKey(FeedbackTracker.CS_COMMENT)) {
             return (String) data.get(FeedbackTracker.CS_COMMENT);
         } else {
@@ -626,7 +627,7 @@ class ChannelStrip {
         }
     }
 
-    public void setComment(String comment) {
+    void setComment(String comment) {
         if (data.containsKey(FeedbackTracker.CS_COMMENT)) {
             data.replace(FeedbackTracker.CS_COMMENT, comment);
         } else {
@@ -634,7 +635,7 @@ class ChannelStrip {
         }
     }
 
-    public float getSoloIso() {
+    float getSoloIso() {
         if (data.containsKey(FeedbackTracker.CS_SOLO_ISO)) {
             return (Float) data.get(FeedbackTracker.CS_SOLO_ISO);
         } else {
@@ -642,7 +643,7 @@ class ChannelStrip {
         }
     }
 
-    public void setSoloIso(Float solo_iso) {
+    void setSoloIso(Float solo_iso) {
         if (data.containsKey(FeedbackTracker.CS_SOLO_ISO)) {
             data.replace(FeedbackTracker.CS_SOLO_ISO, solo_iso);
         } else {
@@ -650,7 +651,7 @@ class ChannelStrip {
         }
     }
 
-    public float getSoloSafe() {
+    float getSoloSafe() {
         if (data.containsKey(FeedbackTracker.CS_SOLO_SAFE)) {
             return (Float) data.get(FeedbackTracker.CS_SOLO_SAFE);
         } else {
@@ -658,7 +659,7 @@ class ChannelStrip {
         }
     }
 
-    public void setSoloSafe(Float solo_safe) {
+    void setSoloSafe(Float solo_safe) {
         if (data.containsKey(FeedbackTracker.CS_SOLO_SAFE)) {
             data.replace(FeedbackTracker.CS_SOLO_SAFE, solo_safe);
         } else {
@@ -666,7 +667,7 @@ class ChannelStrip {
         }
     }
 
-    public float getPolarity() {
+    float getPolarity() {
         if (data.containsKey(FeedbackTracker.CS_POLARITY)) {
             return (Float) data.get(FeedbackTracker.CS_POLARITY);
         } else {
@@ -674,7 +675,7 @@ class ChannelStrip {
         }
     }
 
-    public void setPolarity(Float polarity) {
+    void setPolarity(Float polarity) {
         if (data.containsKey(FeedbackTracker.CS_POLARITY)) {
             data.replace(FeedbackTracker.CS_POLARITY, polarity);
         } else {
@@ -682,7 +683,7 @@ class ChannelStrip {
         }
     }
 
-    public float getMonitorInput() {
+    float getMonitorInput() {
         if (data.containsKey(FeedbackTracker.CS_MONITOR_INPUT)) {
             return (Float) data.get(FeedbackTracker.CS_MONITOR_INPUT);
         } else {
@@ -690,7 +691,7 @@ class ChannelStrip {
         }
     }
 
-    public void setMonitorInput(Float yn) {
+    void setMonitorInput(Float yn) {
         if (data.containsKey(FeedbackTracker.CS_MONITOR_INPUT)) {
             data.replace(FeedbackTracker.CS_MONITOR_INPUT, yn);
         } else {
@@ -698,7 +699,7 @@ class ChannelStrip {
         }
     }
 
-    public float getMonitorDisk() {
+    float getMonitorDisk() {
         if (data.containsKey(FeedbackTracker.CS_MONITOR_DISK)) {
             return (Float) data.get(FeedbackTracker.CS_MONITOR_DISK);
         } else {
@@ -706,7 +707,7 @@ class ChannelStrip {
         }
     }
 
-    public void setMonitorDisk(Float yn) {
+    void setMonitorDisk(Float yn) {
         if (data.containsKey(FeedbackTracker.CS_MONITOR_DISK)) {
             data.replace(FeedbackTracker.CS_MONITOR_DISK, yn);
         } else {
@@ -714,15 +715,15 @@ class ChannelStrip {
         }
     }
 
-    public float getRecEnable() {
-        if (data.containsKey(FeedbackTracker.CS_RECENABLE)) {
-            return (Float) data.get(FeedbackTracker.CS_RECENABLE);
+    float getRecEnable() {
+        if (data.containsKey(FeedbackTracker.CS_TRACK_RECENABLE)) {
+            return (Float) data.get(FeedbackTracker.CS_TRACK_RECENABLE);
         } else {
             return -999.0f;
         }
     }
 
-    public float getRecSafe() {
+    float getRecSafe() {
         if (data.containsKey(FeedbackTracker.CS_RECSAFE)) {
             return (Float) data.get(FeedbackTracker.CS_RECSAFE);
         } else {
@@ -730,7 +731,7 @@ class ChannelStrip {
         }
     }
 
-    public float getExpanded() {
+    float getExpanded() {
         if (data.containsKey(FeedbackTracker.CS_EXPANDED)) {
             return (Float) data.get(FeedbackTracker.CS_EXPANDED);
         } else {
@@ -738,7 +739,7 @@ class ChannelStrip {
         }
     }
 
-    public float getTrim() {
+    float getTrim() {
         if (data.containsKey(FeedbackTracker.CS_TRIM)) {
             return (Float) data.get(FeedbackTracker.CS_TRIM);
         } else {
@@ -746,7 +747,7 @@ class ChannelStrip {
         }
     }
 
-    public void setTrim(Float trim) {
+    void setTrim(Float trim) {
         if (data.containsKey(FeedbackTracker.CS_TRIM)) {
             data.replace(FeedbackTracker.CS_TRIM, trim);
         } else {
@@ -754,7 +755,7 @@ class ChannelStrip {
         }
     }
 
-    public float getPanStereoPosition() {
+    float getPanStereoPosition() {
         if (data.containsKey(FeedbackTracker.CS_PAN_STERO_POSITION)) {
             return (Float) data.get(FeedbackTracker.CS_PAN_STERO_POSITION);
         } else {
@@ -762,7 +763,7 @@ class ChannelStrip {
         }
     }
 
-    public float getNumInputs() {
+    float getNumInputs() {
         if (data.containsKey(FeedbackTracker.CS_NUM_INPUTS)) {
             return (Float) data.get(FeedbackTracker.CS_NUM_INPUTS);
         } else {
@@ -770,7 +771,7 @@ class ChannelStrip {
         }
     }
 
-    public void setNumInputs(Float n_inputs) {
+    void setNumInputs(Float n_inputs) {
         if (data.containsKey(FeedbackTracker.CS_NUM_INPUTS)) {
             data.replace(FeedbackTracker.CS_NUM_INPUTS, n_inputs);
         } else {
@@ -778,7 +779,7 @@ class ChannelStrip {
         }
     }
 
-    public float getNumOutputs() {
+    float getNumOutputs() {
         if (data.containsKey(FeedbackTracker.CS_NUM_OUTPUTS)) {
             return (Float) data.get(FeedbackTracker.CS_NUM_OUTPUTS);
         } else {
@@ -786,7 +787,7 @@ class ChannelStrip {
         }
     }
 
-    public void setNumOutputs(Float n_outputs) {
+    void setNumOutputs(Float n_outputs) {
         if (data.containsKey(FeedbackTracker.CS_NUM_OUTPUTS)) {
             data.replace(FeedbackTracker.CS_NUM_OUTPUTS, n_outputs);
         } else {

@@ -22,6 +22,8 @@ public class CixListener extends Service {
     public static final int FB_STRIP = 0;
     public static final int FB_SELECT = 1;
     public static final int FB_GAIN = 2;
+    public static final int FB_TRACK_RECENABLE = 3;
+    public static final int FB_GLOBAL_RECENABLE = 4;
 
     static final int MSG_REGISTER = 0;
     private static final int MSG_GET_STRIP = 1;
@@ -73,6 +75,7 @@ public class CixListener extends Service {
                         case "/strip/gain":
                         case "/select/gain":
                             fbTracker.setTrackGain(strip, (float) message.getArguments().get(argnum));
+                            updateStrip(strip);
                             break;
                         case "/strip/name":
                             // TODO: Select form seems to pass in single space for name - add to Ardour mantis?
@@ -81,93 +84,126 @@ public class CixListener extends Service {
                             if (!temp_name.equals("")) {
                                 fbTracker.setTrackName(strip, temp_name);
                             }
+                            updateStrip(strip);
                             break;
                         case "/strip/select":
-                            Log.v("Incoming Message", message.getAddress() + " " + message.getArguments().toString());
-
                             Float select = (Float) message.getArguments().get(argnum);
                             fbTracker.setSelected(strip, select);
                             if (select == 1.0f) {
                                 selectStrip(strip);
                             }
+                            updateStrip(strip);
                             break;
                         case "/strip/mute":
                         case "/select/mute":
                             Float mute = (Float) message.getArguments().get(argnum);
                             fbTracker.setMute(strip, mute);
+                            updateStrip(strip);
                             break;
                         case "/strip/solo":
                         case "/select/solo":
                             Float solo = (Float) message.getArguments().get(argnum);
                             fbTracker.setSolo(strip, solo);
+                            updateStrip(strip);
                             break;
                         case "/strip/expand":
                         case "/select/expand":
                             Float expand = (Float) message.getArguments().get(argnum);
                             fbTracker.setExpand(strip, expand);
+                            //updateStrip(strip);
                             break;
                         case "/strip/monitor_input":
                             yn = (int) message.getArguments().get(argnum);
                             fbTracker.setMonitorInput(strip, yn * 1.0f);
+                            updateStrip(strip);
                             break;
                         case "/select/monitor_input":
                             Float mon_in = (Float) message.getArguments().get(argnum);
                             fbTracker.setMonitorInput(strip, mon_in);
+                            updateStrip(strip);
                             break;
                         case "/strip/monitor_disk":
                             yn = (int) message.getArguments().get(argnum);
                             fbTracker.setMonitorDisk(strip, yn * 1.0f);
+                            updateStrip(strip);
                             break;
                         case "/select/monitor_disk":
                             Float mon_disk = (Float) message.getArguments().get(argnum);
                             fbTracker.setMonitorDisk(strip, mon_disk);
+                            updateStrip(strip);
                             break;
                         case "/strip/recenable":
                         case "/select/recenable":
                             rec_enable = (Float) message.getArguments().get(argnum);
                             fbTracker.setRecordEnable(strip, rec_enable);
+                            recEnableStrip(strip, rec_enable);
                             break;
                         case "/strip/record_safe":
                         case "/select/record_safe":
                             rec_safe = (Float) message.getArguments().get(argnum);
                             fbTracker.setRecordSafe(strip, rec_safe);
+                            updateStrip(strip);
                             break;
                         case "/strip/trimdB":
                         case "/select/trimdB":
                             trim = (Float) message.getArguments().get(argnum);
                             fbTracker.setTrim(strip, trim);
+                            updateStrip(strip);
                             break;
                         case "/strip/pan_stereo_position":
                         case "/select/pan_stereo_position":
                             psp = (Float) message.getArguments().get(argnum);
                             fbTracker.setPSP(strip, psp);
+                            updateStrip(strip);
                             break;
                         case "/select/n_inputs":
                             Float n_inputs = (Float) message.getArguments().get(argnum);
                             fbTracker.setNumInputs(strip, n_inputs);
+                            updateStrip(strip);
                             break;
                         case "/select/n_outputs":
                             Float n_outputs = (Float) message.getArguments().get(argnum);
                             fbTracker.setNumOutputs(strip, n_outputs);
+                            updateStrip(strip);
                             break;
                         case "/select/solo_iso":
                             Float solo_iso = (Float) message.getArguments().get(argnum);
                             fbTracker.setSoloIso(strip, solo_iso);
+                            updateStrip(strip);
                             break;
                         case "/select/solo_safe":
                             Float solo_safe = (Float) message.getArguments().get(argnum);
                             fbTracker.setSoloSafe(strip, solo_safe);
+                            updateStrip(strip);
                             break;
                         case "/select/comment":
                             String comment = (String) message.getArguments().get(argnum);
                             fbTracker.setComment(strip, comment);
+                            updateStrip(strip);
                             break;
                         case "/select/polarity":
                             Float polarity = (Float) message.getArguments().get(argnum);
                             fbTracker.setPolarity(strip, polarity);
+                            updateStrip(strip);
                             break;
-
-
+                        case "/rec_enable_toggle":
+                            int global_rec_enable = (int) message.getArguments().get(0);
+                            recEnableGlobal(global_rec_enable);
+                            break;
+                        case "/select/comp_speed":
+                        case "/select/comp_mode":
+                        case "/select/comp_mode_name":
+                        case "/select/comp_speed_name":
+                        case "/select/comp_makeup":
+                        case "/select/eq_hpf":
+                        case "/select/eq_enable":
+                        case "/select/pan_stereo_width":
+                        case "/select/pan_elevation_position":
+                        case "/select/pan_frontback_position":
+                        case "/select/pan_lfe_control":
+                        case "/select/comp_enable":
+                        case "/select/comp_threshold":
+                            break;
                         default:
                             Log.v("Message: ", message.getAddress() + " " + message.getArguments().toString());
                             break;
@@ -179,10 +215,6 @@ public class CixListener extends Service {
                     Log.v("listenerError", message.getAddress() + " " + message.getArguments().toString());
                     Log.e("Exception", e.toString());
                     //e.printStackTrace();
-                } finally {
-                    if (strip != -1) {
-                        updateStrip(strip);
-                    }
                 }
             }
         };
@@ -196,24 +228,23 @@ public class CixListener extends Service {
             /master/gain [-14.119568]
          */
 
-        oscportin.addListener("/bank_up", listener);
-        oscportin.addListener("/bank_down", listener);
-        oscportin.addListener("/loop_toggle", listener);
-        oscportin.addListener("/transport_play", listener);
-        oscportin.addListener("/transport_stop", listener);
-        oscportin.addListener("/rewind", listener);
-        oscportin.addListener("/ffwd", listener);
+        //oscportin.addListener("/bank_up", listener);
+        //oscportin.addListener("/bank_down", listener);
+        //oscportin.addListener("/loop_toggle", listener);
+        //oscportin.addListener("/transport_play", listener);
+        //oscportin.addListener("/transport_stop", listener);
+        //oscportin.addListener("/rewind", listener);
+        //oscportin.addListener("/ffwd", listener);
         oscportin.addListener("/session_name", listener);
-        oscportin.addListener("/record_tally", listener);
+        //oscportin.addListener("/record_tally", listener);
         oscportin.addListener("/record_enabled", listener);
+        oscportin.addListener("/rec_enable_toggle", listener);
         oscportin.addListener("/cancel_all_solos", listener);
         oscportin.addListener("/rec_enable_toggle", listener);
         oscportin.addListener("/strip/*", listener);
         oscportin.addListener("/select/*", listener);
         oscportin.addListener("/master/*", listener);
         oscportin.addListener("/monitor/*", listener);
-        oscportin.addListener("/*/*", listener);
-        oscportin.addListener("/*", listener);
         oscportin.startListening();
     }
 
@@ -232,7 +263,7 @@ public class CixListener extends Service {
         bundle.putFloat(FeedbackTracker.CS_POLARITY, fbTracker.getPolarity(stripID));
         bundle.putFloat(FeedbackTracker.CS_MONITOR_INPUT, fbTracker.getMonitorInput(stripID));
         bundle.putFloat(FeedbackTracker.CS_MONITOR_DISK, fbTracker.getMonitorDisk(stripID));
-        bundle.putFloat(FeedbackTracker.CS_RECENABLE, fbTracker.getRecEnable(stripID));
+        bundle.putFloat(FeedbackTracker.CS_TRACK_RECENABLE, fbTracker.getRecEnable(stripID));
         bundle.putFloat(FeedbackTracker.CS_RECSAFE, fbTracker.getRecSafe(stripID));
         bundle.putFloat(FeedbackTracker.CS_EXPANDED, fbTracker.getExpanded(stripID));
         bundle.putFloat(FeedbackTracker.CS_TRIM, fbTracker.getTrim(stripID));
@@ -252,9 +283,35 @@ public class CixListener extends Service {
     private void selectStrip(final int stripID) { // TODO: need to communicate back to UI
         Message msg = Message.obtain(null, FB_SELECT);
         Bundle bundle = new Bundle();
-        bundle.putInt("strip", stripID);
+        bundle.putInt(FeedbackTracker.CS_ID, stripID);
 
         msg.setData(bundle);
+        try {
+            mActivity.send(msg);
+        } catch (Exception e) {
+            //
+        }
+    }
+
+    private void recEnableStrip(final int stripID, final float rec_enable) { // TODO: need to communicate back to UI
+        Message msg = Message.obtain(null, FB_TRACK_RECENABLE);
+        Bundle bundle = new Bundle();
+        bundle.putInt(FeedbackTracker.CS_ID, stripID);
+        bundle.putFloat(FeedbackTracker.CS_TRACK_RECENABLE, rec_enable);
+
+        msg.setData(bundle);
+        try {
+            mActivity.send(msg);
+        } catch (Exception e) {
+            //
+        }
+
+    }
+
+    private void recEnableGlobal(final int rec_enable) { // TODO: need to communicate back to UI
+        Message msg = Message.obtain(null, FB_GLOBAL_RECENABLE);
+        msg.arg1 = rec_enable;
+
         try {
             mActivity.send(msg);
         } catch (Exception e) {
