@@ -112,6 +112,17 @@ public class CixListener extends Service {
                             fbTracker.setExpand(strip, expand);
                             //updateStrip(strip);
                             break;
+                        /*
+                        V/listenerError: /strip/monitor_input [1, 0.0]
+E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to java.lang.Integer
+E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to java.lang.Integer
+V/Message:: /strip/gui_select [1, 0.0]
+V/listenerError: /strip/monitor_input [2, 0.0]
+E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to java.lang.Integer
+V/listenerError: /strip/monitor_disk [2, 0.0]
+E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to java.lang.Integer
+
+                         */
                         case "/strip/monitor_input":
                             yn = (int) message.getArguments().get(argnum);
                             fbTracker.setMonitorInput(strip, yn * 1.0f);
@@ -119,7 +130,6 @@ public class CixListener extends Service {
                             break;
                         case "/select/monitor_input":
                             Float mon_in = (Float) message.getArguments().get(argnum);
-                            fbTracker.setMonitorInput(strip, mon_in);
                             updateStrip(strip);
                             break;
                         case "/strip/monitor_disk":

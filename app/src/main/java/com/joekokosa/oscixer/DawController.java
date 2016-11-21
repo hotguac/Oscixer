@@ -157,7 +157,7 @@ class DawController {
         // Creating the message
         ArrayList<Object> moreThingsToSend = new ArrayList<>();
         moreThingsToSend.add(0); // bank size 0 = all on one
-        moreThingsToSend.add(895); // strips
+        moreThingsToSend.add(895); // strips 895
         moreThingsToSend.add(8211); // feed back
         moreThingsToSend.add(0); // gain mode
 

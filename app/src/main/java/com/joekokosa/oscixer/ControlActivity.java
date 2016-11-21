@@ -14,10 +14,13 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.menu.ActionMenuItemView;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.TextView;
 
@@ -32,6 +35,9 @@ public class ControlActivity extends AppCompatActivity {
     static private DawController controller;
     static private DatagramSocket sock;
     private final Messenger mMessenger = new Messenger(new ResponseHandler(this));
+    float fader;
+    float last_fader;
+    AppCompatImageView touch_area;
     private TextView textView;
     /**
      * Defines callbacks for service binding, passed to bindService()
@@ -40,6 +46,8 @@ public class ControlActivity extends AppCompatActivity {
     private int strip;
     private int selected_strip;
     private float rec_enable;
+    private VelocityTracker mVelocityTracker = null;
+
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -101,6 +109,128 @@ public class ControlActivity extends AppCompatActivity {
         } finally {
             sock = controller.attachPorts(target_host, port);
         }
+
+        touch_area = (AppCompatImageView) findViewById(R.id.touch_area);
+
+        touch_area.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                // ... Respond to touch events
+                int index = event.getActionIndex();
+                int action = event.getActionMasked();
+                int pointerId = event.getPointerId(index);
+
+                int mWidth = v.getLeft() - v.getRight();
+                int mHeight = v.getTop() - v.getBottom();
+                boolean first_point = true;
+                float deltaX;
+                float lastX = 0.0f;
+                float lastY = 0.0f;
+                float posX;
+                float posY;
+                float avgY;
+                float faderChange = 0.0f;
+                float velocity_scale = 1.0f;
+                float y_scale = 1.0f;
+                float maxY = v.getTop();
+                float minY = v.getBottom();
+
+
+                //Log.d("Touch", String.format("Width=%d Height=%d",mWidth,mHeight));
+
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (mVelocityTracker == null) {
+                            // Retrieve a new VelocityTracker object to watch the velocity of a motion.
+                            mVelocityTracker = VelocityTracker.obtain();
+                        } else {
+                            // Reset the velocity tracker back to its initial state.
+                            mVelocityTracker.clear();
+                        }
+                        // Add a user's movement to the tracker.
+                        mVelocityTracker.addMovement(event);
+                        first_point = true;
+                        last_fader = fader;
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        mVelocityTracker.addMovement(event);
+                        // When you want to determine the velocity, call
+                        // computeCurrentVelocity(). Then call getXVelocity()
+                        // and getYVelocity() to retrieve the velocity for each pointer ID.
+                        mVelocityTracker.computeCurrentVelocity(1000);
+                        // Log velocity of pixels per second
+                        // Best practice to use VelocityTrackerCompat where possible.
+                        // TODO: handle multi-touch
+                        int nhist = event.getHistorySize();
+
+                        for (int idx = 0; idx < nhist; idx++) {
+                            posX = event.getHistoricalAxisValue(0, idx);
+                            posY = event.getHistoricalAxisValue(1, idx);
+
+                            //Log.d("Track", String.format("Pos(X,Y) = (%f,%f)" , posX, posY));
+                            if (first_point) {
+                                first_point = false;
+                                lastX = posX;
+                                lastY = posY;
+                            } else {
+                                deltaX = posX - lastX;
+                                avgY = (lastY + posY) / 2.0f;
+                                y_scale = (avgY - minY) / (maxY - minY) * (20.0f - 0.5f) + 0.5f;
+                                faderChange += velocity_scale * y_scale * (deltaX / mWidth);
+                                if ((faderChange > 0.05f) || (faderChange < -0.05f)) {
+                                    Log.d("Fader change", String.format("%f deltaX =%f avgY = %f y_scale = %f lastfader = %f", faderChange, deltaX, avgY, y_scale, last_fader));
+                                    last_fader += faderChange;
+                                    controller.moveFader(selected_strip, last_fader);
+                                    faderChange = 0.0f;
+                                }
+                                lastX = posX;
+                                lastY = posY;
+                            }
+                        }
+
+                        posX = event.getAxisValue(0);
+                        posY = event.getAxisValue(1);
+
+                        //Log.d("Track", String.format("Pos(X,Y) = (%f,%f)" , posX, posY));
+                        if (first_point) {
+                            first_point = false;
+                            lastX = posX;
+                            lastY = posY;
+                        } else {
+                            deltaX = posX - lastX;
+                            avgY = (lastY + posY) / 2.0f;
+                            y_scale = (avgY - minY) / (maxY - minY) * (20.0f - 0.5f) + 0.5f;
+                            faderChange += velocity_scale * y_scale * (deltaX / mWidth);
+                            if ((faderChange > 0.05f) || (faderChange < -0.05f)) {
+                                Log.d("Fader change", String.format("%f deltaX =%f avgY = %f y_scale = %f lastfader = %f", faderChange, deltaX, avgY, y_scale, last_fader));
+                                last_fader += faderChange;
+                                controller.moveFader(selected_strip, last_fader);
+                                faderChange = 0.0f;
+                            }
+                            lastX = posX;
+                            lastY = posY;
+                        }
+                        //Log.d("Track", String.format("Pos(X,Y) = (%f,%f)" , event.getAxisValue(0), event.getAxisValue(1)));
+                        //Log.d("Track", String.format("Index = %d ", index));
+                        //Log.d("Track", "X velocity: " +
+                        //        VelocityTrackerCompat.getXVelocity(mVelocityTracker,
+                        //                pointerId));
+                        //Log.d("Track", "Y velocity: " +
+                        //        VelocityTrackerCompat.getYVelocity(mVelocityTracker,
+                        //                pointerId));
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        // Return a VelocityTracker object back to be re-used by others.
+                        mVelocityTracker.recycle();
+                        mVelocityTracker = null;
+
+                        first_point = false;
+                        break;
+                }
+
+                return true;
+            }
+        });
     }
 
     @Override
@@ -212,7 +342,7 @@ public class ControlActivity extends AppCompatActivity {
             switch (message.what) {
                 case CixListener.FB_GAIN:
                     strip = message.getData().getInt(CS_ID, 0);
-                    float fader = message.getData().getFloat(CS_FADER, -999.0f);
+                    fader = message.getData().getFloat(CS_FADER, -999.0f);
                     String name = message.getData().getString(CS_NAME, "not found");
                     activity.textView.setText(String.format("Strip %d-%s = %f", strip, name, fader));
                     break;
@@ -259,6 +389,11 @@ public class ControlActivity extends AppCompatActivity {
                     break;
                 case CixListener.FB_STRIP:
                     temp_strip = message.getData().getInt(CS_ID, 0);
+                    if (selected_strip == 0) {
+                        selected_strip = temp_strip;
+                        controller.selectTrack(selected_strip);
+                    }
+
                     if (selected_strip == temp_strip) {
                         strip = temp_strip;
                         name = message.getData().getString(FeedbackTracker.CS_NAME, "not found");

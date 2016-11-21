@@ -88,13 +88,19 @@
                     android:id="@+id/feedback_text"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="115" />
+                    android:layout_weight="10" />
 
                 <android.support.v7.widget.AppCompatImageView
                     android:id="@+id/touch_area"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="85" />
+                    android:layout_marginBottom="6dp"
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_weight="90"
+                    android:elevation="2dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/touch_area_gradient" />
             </android.support.v7.widget.LinearLayoutCompat>
 
             <android.support.v7.widget.LinearLayoutCompat
