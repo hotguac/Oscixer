@@ -100,7 +100,7 @@
                     android:layout_weight="90"
                     android:elevation="2dp"
                     android:scaleType="fitXY"
-                    android:src="@drawable/touch_area_gradient" />
+                    android:src="@drawable/end" />
             </android.support.v7.widget.LinearLayoutCompat>
 
             <android.support.v7.widget.LinearLayoutCompat

@@ -162,6 +162,7 @@ public class ControlActivity extends AppCompatActivity {
                         // TODO: handle multi-touch
                         int nhist = event.getHistorySize();
 
+                        Log.d("Fader change", String.format("num hist = %d", nhist));
                         for (int idx = 0; idx < nhist; idx++) {
                             posX = event.getHistoricalAxisValue(0, idx);
                             posY = event.getHistoricalAxisValue(1, idx);
@@ -397,10 +398,11 @@ public class ControlActivity extends AppCompatActivity {
                     if (selected_strip == temp_strip) {
                         strip = temp_strip;
                         name = message.getData().getString(FeedbackTracker.CS_NAME, "not found");
+                        fader = message.getData().getFloat(FeedbackTracker.CS_FADER, 0.0f);
+                        /*
                         String comment = message.getData().getString(FeedbackTracker.CS_COMMENT, "");
                         float mute = message.getData().getFloat(FeedbackTracker.CS_MUTE, 0.0f);
                         float solo = message.getData().getFloat(FeedbackTracker.CS_SOLO, 0.0f);
-                        fader = message.getData().getFloat(FeedbackTracker.CS_FADER, 0.0f);
                         float trim = message.getData().getFloat(FeedbackTracker.CS_TRIM, 0.0f);
                         float solo_iso = message.getData().getFloat(FeedbackTracker.CS_SOLO_ISO, 0.0f);
                         float solo_safe = message.getData().getFloat(FeedbackTracker.CS_SOLO_SAFE, 0.0f);
@@ -416,15 +418,10 @@ public class ControlActivity extends AppCompatActivity {
                         float num_inputs = message.getData().getFloat(FeedbackTracker.CS_NUM_INPUTS, 0.0f);
                         float num_outputs = message.getData().getFloat(FeedbackTracker.CS_NUM_OUTPUTS, 0.0f);
 
+                         */
+
                         try {
-                            String state = String.format("Id = %d\tMute = %f\tTrim = %f\nFader = %f\tComment = '%s'\n" +
-                                            "Solo = %f\tSolo_Iso = %f\nSolo_Safe = %f\tPolarity = %f\nMonitor_input = %f\t" +
-                                            "Monitor_disk = %f\nRec_Safe = %f\nPan_Position = %f\n" +
-                                            "Pan_Width = %f\tNum_Inputs = %f\nNum_Outputs = %f\n",
-                                    strip, mute, trim, fader, comment,
-                                    solo, solo_iso, solo_safe, polarity, monitor_input,
-                                    monitor_disk, rec_safe, pan_stereo_position, pan_stereo_width,
-                                    num_inputs, num_outputs);
+                            String state = String.format("Id = %d\tFader = %f\t", strip, fader);
                             activity.textView.setText(state);
 
                             Toolbar toolbar = (Toolbar) this.activity.findViewById(R.id.my_toolbar);
