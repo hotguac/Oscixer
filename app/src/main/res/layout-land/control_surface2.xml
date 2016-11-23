@@ -21,6 +21,7 @@
         android:id="@+id/feedback_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="8dp"
         android:text="How Now Brown Cow"
@@ -33,9 +34,10 @@
         android:id="@+id/touch_area"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:elevation="2dp"
         android:src="@drawable/end"
@@ -49,6 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
+        android:layout_marginStart="4dp"
         android:elevation="2dp"
         android:onClick="onClicks"
         android:src="@drawable/up_controls"
@@ -60,6 +63,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
+        android:layout_marginStart="4dp"
         android:elevation="2dp"
         android:onClick="onClicks"
         android:src="@drawable/down_controls"
@@ -71,6 +75,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
+        android:layout_marginStart="4dp"
         android:elevation="2dp"
         android:onClick="onClicks"
         android:src="@drawable/prev_strip"
@@ -82,6 +87,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
+        android:layout_marginStart="4dp"
         android:elevation="2dp"
         android:onClick="onClicks"
         android:src="@drawable/next_strip"
@@ -110,7 +116,8 @@
         android:onClick="onClicks"
         android:src="@drawable/play"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@+id/transport_stop" />
+        app:layout_constraintLeft_toRightOf="@+id/transport_stop"
+        app:layout_constraintRight_toLeftOf="@+id/transport_loop" />
 
     <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/transport_loop"
@@ -121,7 +128,8 @@
         android:onClick="onClicks"
         android:src="@drawable/loop"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@+id/transport_play" />
+        app:layout_constraintLeft_toRightOf="@+id/transport_play"
+        app:layout_constraintRight_toLeftOf="@+id/transport_home" />
 
     <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/transport_home"
@@ -132,7 +140,8 @@
         android:onClick="onClicks"
         android:src="@drawable/home"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@+id/transport_loop" />
+        app:layout_constraintLeft_toRightOf="@+id/transport_loop"
+        app:layout_constraintRight_toLeftOf="@+id/transport_end" />
 
     <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/transport_end"
@@ -143,7 +152,8 @@
         android:onClick="onClicks"
         android:src="@drawable/end"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@+id/transport_home" />
+        app:layout_constraintLeft_toRightOf="@+id/transport_home"
+        app:layout_constraintRight_toLeftOf="@+id/transport_prev_mark" />
 
     <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/transport_prev_mark"
@@ -154,7 +164,8 @@
         android:onClick="onClicks"
         android:src="@drawable/prev_mark"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@+id/transport_end" />
+        app:layout_constraintLeft_toRightOf="@+id/transport_end"
+        app:layout_constraintRight_toLeftOf="@+id/transport_next_mark" />
 
     <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/transport_next_mark"

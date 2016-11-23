@@ -17,7 +17,7 @@ import java.net.DatagramSocket;
 import java.util.Date;
 
 
-public class CixListener extends Service {
+class CixListener extends Service {
 
     public static final int FB_STRIP = 0;
     public static final int FB_SELECT = 1;
@@ -55,10 +55,9 @@ public class CixListener extends Service {
         Float trim;
         Float psp;
 
-        //Log.v("Message: ", message.getAddress() + " " + message.getArguments().toString());
         try {
             String myAddress = message.getAddress();
-            //Log.v("Incoming Message", message.getAddress() + " " + message.getArguments().toString());
+
             if (myAddress.startsWith("/strip/")) {
                 strip = (int) message.getArguments().get(0);
                 argnum = 1;
@@ -213,16 +212,16 @@ E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to jav
                 case "/select/comp_threshold":
                     break;
                 default:
-                    Log.v("Message: ", message.getAddress() + " " + message.getArguments().toString());
+                    Log.i("Message: ", message.getAddress() + " " + message.getArguments().toString());
                     break;
             }
 
             // update the UI TODO: move to class and only update if the ui is showing the appropriate control
 
         } catch (Exception e) {
-            Log.v("listenerError", message.getAddress() + " " + message.getArguments().toString());
+            Log.e("listenerError", message.getAddress() + " " + message.getArguments().toString());
             Log.e("Exception", e.toString());
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
 

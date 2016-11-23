@@ -41,7 +41,7 @@ class FeedbackTracker {
     static final String CS_NUM_OUTPUTS = "num_outputs";
 
     //private final ArrayList<ChannelStrip> audio_tracks;
-    ChannelStrip audio_tracks[];
+    private final ChannelStrip[] audio_tracks;
 
     private int selected_track;
 

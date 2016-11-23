@@ -18,37 +18,33 @@ import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.net.DatagramSocket;
-import java.util.Locale;
 
 import static com.joekokosa.oscixer.FeedbackTracker.CS_FADER;
 import static com.joekokosa.oscixer.FeedbackTracker.CS_ID;
 import static com.joekokosa.oscixer.FeedbackTracker.CS_NAME;
 import static com.joekokosa.oscixer.MainActivity.EXTRA_MESSAGE;
 
-public class ControlActivity extends AppCompatActivity {
-    static private DawController controller;
+class ControlActivity extends AppCompatActivity {
+    static protected DawController controller;
     static private DatagramSocket sock;
     private final Messenger mMessenger = new Messenger(new ResponseHandler(this));
-    float fader;
-    float last_fader;
-    AppCompatImageView touch_area;
+    protected float fader;
+    protected float last_fader;
+    protected int selected_strip;
     private TextView textView;
     /**
      * Defines callbacks for service binding, passed to bindService()
      */
     private boolean mBound = false;
     private int strip;
-    private int selected_strip;
     private float rec_enable;
     private VelocityTracker mVelocityTracker = null;
 
@@ -94,7 +90,7 @@ public class ControlActivity extends AppCompatActivity {
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
-        //myToolbar.inflateMenu(R.menu.cs_menu);
+
         getSupportActionBar().openOptionsMenu();
 
         Intent intent = getIntent();
@@ -119,8 +115,10 @@ public class ControlActivity extends AppCompatActivity {
             sock = controller.attachPorts(target_host, port);
         }
 
-        touch_area = (AppCompatImageView) findViewById(R.id.touch_area);
+        AppCompatImageView touch_area = (AppCompatImageView) findViewById(R.id.touch_area);
+        touch_area.setOnTouchListener(new TouchArea(this));
 
+/*
         touch_area.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 // ... Respond to touch events
@@ -142,9 +140,6 @@ public class ControlActivity extends AppCompatActivity {
                 float y_scale = 1.0f;
                 float maxY = v.getTop();
                 float minY = v.getBottom();
-
-
-                //Log.d("Touch", String.format("Width=%d Height=%d",mWidth,mHeight));
 
                 switch (action) {
                     case MotionEvent.ACTION_DOWN:
@@ -176,7 +171,6 @@ public class ControlActivity extends AppCompatActivity {
                             posX = event.getHistoricalAxisValue(0, idx);
                             posY = event.getHistoricalAxisValue(1, idx);
 
-                            //Log.d("Track", String.format("Pos(X,Y) = (%f,%f)" , posX, posY));
                             if (first_point) {
                                 first_point = false;
                                 lastX = posX;
@@ -200,7 +194,6 @@ public class ControlActivity extends AppCompatActivity {
                         posX = event.getAxisValue(0);
                         posY = event.getAxisValue(1);
 
-                        //Log.d("Track", String.format("Pos(X,Y) = (%f,%f)" , posX, posY));
                         if (first_point) {
                             first_point = false;
                             lastX = posX;
@@ -241,6 +234,7 @@ public class ControlActivity extends AppCompatActivity {
                 return true;
             }
         });
+*/
     }
 
     @Override
@@ -275,18 +269,14 @@ public class ControlActivity extends AppCompatActivity {
         width = metrics.widthPixels;
         height = metrics.heightPixels;
 
-        Log.v("R.attr", String.format(Locale.US, "GridLayout dimensions = %d, %d", width, height));
+        //Log.v("R.attr", String.format(Locale.US, "GridLayout dimensions = %d, %d", width, height));
 
-        Display display = this.getWindowManager().getDefaultDisplay();
-        display.getMetrics(metrics);
-
-        width = metrics.widthPixels;
-        height = metrics.heightPixels;
-
-        Log.v("R.attr", String.format(Locale.US, "GridLayout dimensions = %d, %d", width, height));
-
-        ViewGroup.LayoutParams params = findViewById(R.id.touch_area).getLayoutParams();
-        params.height = (height / 4) * 3;
+        ViewGroup.LayoutParams taParams = findViewById(R.id.touch_area).getLayoutParams();
+        ViewGroup.LayoutParams fbParams = findViewById(R.id.feedback_text).getLayoutParams();
+        ViewGroup.LayoutParams thParams = findViewById(R.id.transport_home).getLayoutParams();
+        int newHeight = Math.round(height * 0.5f); // TODO: this is a kludge, fix layout
+        taParams.height = newHeight;
+        Log.d("TouchArea", taParams.toString());
     }
 
     @Override
@@ -307,7 +297,7 @@ public class ControlActivity extends AppCompatActivity {
         }
     }
 
-    public void onClicks(View view) {
+    void onClicks(View view) {
         switch (view.getId()) {
             case R.id.transport_play:
                 controller.startTransport();
@@ -339,7 +329,7 @@ public class ControlActivity extends AppCompatActivity {
         }
     }
 
-    public void menuClick(MenuItem item) {
+    void menuClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.globalRecEnable:
                 controller.globalRecordEnable();
@@ -374,7 +364,7 @@ public class ControlActivity extends AppCompatActivity {
                     strip = message.getData().getInt(CS_ID, 0);
                     fader = message.getData().getFloat(CS_FADER, -999.0f);
                     String name = message.getData().getString(CS_NAME, "not found");
-                    activity.textView.setText(String.format("Strip %d-%s = %f", strip, name, fader));
+                    activity.textView.setText(Float.toString(fader));
                     break;
                 case CixListener.FB_SELECT:
                     selected_strip = message.getData().getInt(CS_ID, 0);
@@ -450,8 +440,7 @@ public class ControlActivity extends AppCompatActivity {
                          */
 
                         try {
-                            String state = String.format("Id = %d\tFader = %f\t", strip, fader);
-                            activity.textView.setText(state);
+                            activity.textView.setText(Float.toString(fader));
 
                             Toolbar toolbar = (Toolbar) this.activity.findViewById(R.id.my_toolbar);
                             toolbar.setTitle("Oscixer  -  " + name);
