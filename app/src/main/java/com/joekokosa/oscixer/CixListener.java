@@ -70,8 +70,10 @@ public class CixListener extends Service {
             switch (myAddress) {
                 case "/strip/gain":
                 case "/select/gain":
-                    fbTracker.setFader(strip, (float) message.getArguments().get(argnum));
-                    updateFader(strip);
+                    if (strip != 0) {
+                        fbTracker.setFader(strip, (float) message.getArguments().get(argnum));
+                        updateFader(strip);
+                    }
                     break;
                 case "/strip/name":
                     // TODO: Select form seems to pass in single space for name - add to Ardour mantis?

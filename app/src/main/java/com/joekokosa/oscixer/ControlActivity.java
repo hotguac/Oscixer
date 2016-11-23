@@ -16,15 +16,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.menu.ActionMenuItemView;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.net.DatagramSocket;
+import java.util.Locale;
 
 import static com.joekokosa.oscixer.FeedbackTracker.CS_FADER;
 import static com.joekokosa.oscixer.FeedbackTracker.CS_ID;
@@ -81,7 +85,12 @@ public class ControlActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         //setContentView(R.layout.control_surface);
-        setContentView(R.layout.control_surface);
+        setContentView(R.layout.control_surface2);
+        // android:scaleType="fitXY"
+        // android:layout_marginEnd="16dp"
+        // app:layout_constraintVertical_bias="1.0"
+        // https://developer.android.com/reference/android/support/constraint/ConstraintLayout.html
+
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -258,6 +267,26 @@ public class ControlActivity extends AppCompatActivity {
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             mBound = true;
         }
+
+        int width;
+        int height;
+
+        DisplayMetrics metrics = this.getResources().getDisplayMetrics();
+        width = metrics.widthPixels;
+        height = metrics.heightPixels;
+
+        Log.v("R.attr", String.format(Locale.US, "GridLayout dimensions = %d, %d", width, height));
+
+        Display display = this.getWindowManager().getDefaultDisplay();
+        display.getMetrics(metrics);
+
+        width = metrics.widthPixels;
+        height = metrics.heightPixels;
+
+        Log.v("R.attr", String.format(Locale.US, "GridLayout dimensions = %d, %d", width, height));
+
+        ViewGroup.LayoutParams params = findViewById(R.id.touch_area).getLayoutParams();
+        params.height = (height / 4) * 3;
     }
 
     @Override
@@ -354,7 +383,7 @@ public class ControlActivity extends AppCompatActivity {
                     temp_strip = message.getData().getInt(CS_ID, 0);
                     if (selected_strip == temp_strip) {
                         float temp_rec_enable = message.getData().getFloat(FeedbackTracker.CS_TRACK_RECENABLE, 0.0f);
-                        if (temp_rec_enable != saved_trk_rec_enable) {
+                        if (temp_rec_enable != rec_enable) {
                             try {
                                 ActionMenuItemView trk_enable = (ActionMenuItemView) findViewById(R.id.trackRecEnable);
                                 if (temp_rec_enable == 0.0f) {
@@ -367,7 +396,7 @@ public class ControlActivity extends AppCompatActivity {
                                 Log.e("Recenable", e.getMessage());
                             }
                         }
-                        saved_trk_rec_enable = temp_rec_enable;
+                        rec_enable = temp_rec_enable;
                     }
                     break;
                 case CixListener.FB_GLOBAL_RECENABLE:

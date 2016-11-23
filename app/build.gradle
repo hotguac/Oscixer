@@ -33,5 +33,6 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.illposed.osc:javaosc-core:0.3'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
     testCompile 'junit:junit:4.12'
 }
