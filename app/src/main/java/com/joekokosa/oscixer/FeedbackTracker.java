@@ -119,12 +119,21 @@ class FeedbackTracker {
 
         audio_tracks[strip].recordEnable = yn;
     }
+
+    public void setTrim(int strip, Float trim) {
+        if (audio_tracks[strip] == null) {
+            audio_tracks[strip] = new ChannelStrip();
+        }
+
+        audio_tracks[strip].fader = trim;
+    }
 }
 
 class ChannelStrip {
 
     //private final HashMap data;
     Float fader;
+    Float trim;
     String name;
     Float expanded;
     Float recordEnable;

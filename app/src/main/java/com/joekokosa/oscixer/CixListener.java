@@ -24,12 +24,14 @@ class CixListener extends Service {
     public static final int FB_GAIN = 2;
     public static final int FB_TRACK_RECENABLE = 3;
     public static final int FB_GLOBAL_RECENABLE = 4;
+    public static final int FB_NAME = 5;
+    public static final int FB_FULL = 6;
 
     static final int MSG_REGISTER = 0;
-    private static final int MSG_GET_STRIP = 1;
-
+    static final int MSG_SETMODE = 1;
     private final FeedbackTracker fbTracker = new FeedbackTracker();
     private final Messenger mMessenger = new Messenger((new IncomingHandler(this)));
+    private int current_mode = 0;
     private OSCPortIn oscportin;
     private Messenger mActivity = null;
 
@@ -69,9 +71,22 @@ class CixListener extends Service {
             switch (myAddress) {
                 case "/strip/gain":
                 case "/select/gain":
-                    if (strip != 0) {
-                        fbTracker.setFader(strip, (float) message.getArguments().get(argnum));
-                        updateFader(strip);
+                    if (strip > 0) {
+                        Float fader = (Float) message.getArguments().get(argnum);
+                        fbTracker.setFader(strip, fader);
+                        if (current_mode == ControlActivity.MODE_FADER) {
+                            updateStripFloat(strip, FeedbackTracker.CS_FADER, fader);
+                        }
+                    }
+                    break;
+                case "/strip/trimdB":
+                case "/select/trimdB":
+                    if (strip > 0) {
+                        trim = (Float) message.getArguments().get(argnum);
+                        fbTracker.setTrim(strip, trim);
+                        if (current_mode == ControlActivity.MODE_TRIM) {
+                            updateStripFloat(strip, FeedbackTracker.CS_TRIM, trim);
+                        }
                     }
                     break;
                 case "/strip/name":
@@ -80,6 +95,7 @@ class CixListener extends Service {
                     String temp_name = (String) message.getArguments().get(argnum);
                     if (!temp_name.equals("")) {
                         fbTracker.setTrackName(strip, temp_name);
+                        updateStripName(strip, temp_name);
                     }
                     //updateFader(strip);
                     break;
@@ -149,12 +165,6 @@ E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to jav
                 case "/select/record_safe":
                     rec_safe = (Float) message.getArguments().get(argnum);
                     //fbTracker.setRecordSafe(strip, rec_safe);
-                    //updateFader(strip);
-                    break;
-                case "/strip/trimdB":
-                case "/select/trimdB":
-                    trim = (Float) message.getArguments().get(argnum);
-                    //fbTracker.setTrim(strip, trim);
                     //updateFader(strip);
                     break;
                 case "/strip/pan_stereo_position":
@@ -262,6 +272,34 @@ E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to jav
         //p.start();
     }
 
+    private void updateStripFloat(final int stripID, String key, Float value) {
+        Message msg = Message.obtain(null, FB_STRIP);
+        Bundle bundle = new Bundle();
+        bundle.putInt(FeedbackTracker.CS_ID, stripID);
+        bundle.putFloat(key, value);
+
+        msg.setData(bundle);
+        try {
+            mActivity.send(msg);
+        } catch (Exception e) {
+            //
+        }
+    }
+
+    private void updateStripName(final int stripID, String name) {
+        Message msg = Message.obtain(null, FB_NAME);
+        Bundle bundle = new Bundle();
+        bundle.putInt(FeedbackTracker.CS_ID, stripID);
+        bundle.putString(FeedbackTracker.CS_NAME, name);
+
+        msg.setData(bundle);
+        try {
+            mActivity.send(msg);
+        } catch (Exception e) {
+            Log.e("updateStripName", e.getMessage());
+        }
+    }
+
     private void updateFader(final int stripID) { // TODO: need to communicate back to UI
         Message msg = Message.obtain(null, FB_STRIP);
         Bundle bundle = new Bundle();
@@ -333,9 +371,9 @@ E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to jav
         } catch (Exception e) {
             //
         }
-
     }
 
+    // Receives messages coming from ControlActivity
     static class IncomingHandler extends Handler {
         final CixListener cix;
 
@@ -347,14 +385,16 @@ E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to jav
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_REGISTER:
+                    // Provides target to send messages back to Control Activity
                     cix.mActivity = msg.replyTo;
+                    // The socket created by DawController. Ardour will reply to this socket.
                     DatagramSocket sock = (DatagramSocket) msg.obj;
+
                     cix.setSocket(sock);
                     cix.attachListeners();
                     break;
-
-                case MSG_GET_STRIP:
-                    cix.updateFader(msg.arg1);
+                case MSG_SETMODE:
+                    cix.current_mode = msg.arg1;
                     break;
             }
         }

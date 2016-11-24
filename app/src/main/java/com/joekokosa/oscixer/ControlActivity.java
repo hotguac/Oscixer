@@ -20,7 +20,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -33,12 +32,17 @@ import static com.joekokosa.oscixer.FeedbackTracker.CS_NAME;
 import static com.joekokosa.oscixer.MainActivity.EXTRA_MESSAGE;
 
 class ControlActivity extends AppCompatActivity {
+    static final public int MODE_FADER = 0;
+    static final public int MODE_PAN = 1;
+    static final public int MODE_TRIM = 2;
     static protected DawController controller;
     static private DatagramSocket sock;
-    private final Messenger mMessenger = new Messenger(new ResponseHandler(this));
-    protected float fader;
-    protected float last_fader;
+    protected Float fader;
+    protected Float trim;
+    protected Float pan_stereo_position;
+    protected Float last_fader;
     protected int selected_strip;
+    private Messenger mMessenger;
     private TextView textView;
     /**
      * Defines callbacks for service binding, passed to bindService()
@@ -46,8 +50,7 @@ class ControlActivity extends AppCompatActivity {
     private boolean mBound = false;
     private int strip;
     private float rec_enable;
-    private VelocityTracker mVelocityTracker = null;
-
+    private int current_mode = MODE_FADER;
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -80,13 +83,8 @@ class ControlActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //setContentView(R.layout.control_surface);
         setContentView(R.layout.control_surface2);
-        // android:scaleType="fitXY"
-        // android:layout_marginEnd="16dp"
-        // app:layout_constraintVertical_bias="1.0"
         // https://developer.android.com/reference/android/support/constraint/ConstraintLayout.html
-
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -115,126 +113,10 @@ class ControlActivity extends AppCompatActivity {
             sock = controller.attachPorts(target_host, port);
         }
 
+        mMessenger = new Messenger(new ResponseHandler(this));
+
         AppCompatImageView touch_area = (AppCompatImageView) findViewById(R.id.touch_area);
         touch_area.setOnTouchListener(new TouchArea(this));
-
-/*
-        touch_area.setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                // ... Respond to touch events
-                int index = event.getActionIndex();
-                int action = event.getActionMasked();
-                int pointerId = event.getPointerId(index);
-
-                int mWidth = v.getLeft() - v.getRight();
-                int mHeight = v.getTop() - v.getBottom();
-                boolean first_point = true;
-                float deltaX;
-                float lastX = 0.0f;
-                float lastY = 0.0f;
-                float posX;
-                float posY;
-                float avgY;
-                float faderChange = 0.0f;
-                float velocity_scale = 1.0f;
-                float y_scale = 1.0f;
-                float maxY = v.getTop();
-                float minY = v.getBottom();
-
-                switch (action) {
-                    case MotionEvent.ACTION_DOWN:
-                        if (mVelocityTracker == null) {
-                            // Retrieve a new VelocityTracker object to watch the velocity of a motion.
-                            mVelocityTracker = VelocityTracker.obtain();
-                        } else {
-                            // Reset the velocity tracker back to its initial state.
-                            mVelocityTracker.clear();
-                        }
-                        // Add a user's movement to the tracker.
-                        mVelocityTracker.addMovement(event);
-                        first_point = true;
-                        last_fader = fader;
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        mVelocityTracker.addMovement(event);
-                        // When you want to determine the velocity, call
-                        // computeCurrentVelocity(). Then call getXVelocity()
-                        // and getYVelocity() to retrieve the velocity for each pointer ID.
-                        mVelocityTracker.computeCurrentVelocity(1000);
-                        // Log velocity of pixels per second
-                        // Best practice to use VelocityTrackerCompat where possible.
-                        // TODO: handle multi-touch
-                        int nhist = event.getHistorySize();
-
-                        Log.d("Fader change", String.format("num hist = %d", nhist));
-                        for (int idx = 0; idx < nhist; idx++) {
-                            posX = event.getHistoricalAxisValue(0, idx);
-                            posY = event.getHistoricalAxisValue(1, idx);
-
-                            if (first_point) {
-                                first_point = false;
-                                lastX = posX;
-                                lastY = posY;
-                            } else {
-                                deltaX = posX - lastX;
-                                avgY = (lastY + posY) / 2.0f;
-                                y_scale = (avgY - minY) / (maxY - minY) * (20.0f - 0.5f) + 0.5f;
-                                faderChange += velocity_scale * y_scale * (deltaX / mWidth);
-                                if ((faderChange > 0.05f) || (faderChange < -0.05f)) {
-                                    Log.d("Fader change", String.format("%f deltaX =%f avgY = %f y_scale = %f lastfader = %f", faderChange, deltaX, avgY, y_scale, last_fader));
-                                    last_fader += faderChange;
-                                    controller.moveFader(selected_strip, last_fader);
-                                    faderChange = 0.0f;
-                                }
-                                lastX = posX;
-                                lastY = posY;
-                            }
-                        }
-
-                        posX = event.getAxisValue(0);
-                        posY = event.getAxisValue(1);
-
-                        if (first_point) {
-                            first_point = false;
-                            lastX = posX;
-                            lastY = posY;
-                        } else {
-                            deltaX = posX - lastX;
-                            avgY = (lastY + posY) / 2.0f;
-                            y_scale = (avgY - minY) / (maxY - minY) * (20.0f - 0.5f) + 0.5f;
-                            faderChange += velocity_scale * y_scale * (deltaX / mWidth);
-                            if ((faderChange > 0.05f) || (faderChange < -0.05f)) {
-                                Log.d("Fader change", String.format("%f deltaX =%f avgY = %f y_scale = %f lastfader = %f", faderChange, deltaX, avgY, y_scale, last_fader));
-                                last_fader += faderChange;
-                                controller.moveFader(selected_strip, last_fader);
-                                faderChange = 0.0f;
-                            }
-                            lastX = posX;
-                            lastY = posY;
-                        }
-                        //Log.d("Track", String.format("Pos(X,Y) = (%f,%f)" , event.getAxisValue(0), event.getAxisValue(1)));
-                        //Log.d("Track", String.format("Index = %d ", index));
-                        //Log.d("Track", "X velocity: " +
-                        //        VelocityTrackerCompat.getXVelocity(mVelocityTracker,
-                        //                pointerId));
-                        //Log.d("Track", "Y velocity: " +
-                        //        VelocityTrackerCompat.getYVelocity(mVelocityTracker,
-                        //                pointerId));
-                        break;
-                    case MotionEvent.ACTION_UP:
-                    case MotionEvent.ACTION_CANCEL:
-                        // Return a VelocityTracker object back to be re-used by others.
-                        mVelocityTracker.recycle();
-                        mVelocityTracker = null;
-
-                        first_point = false;
-                        break;
-                }
-
-                return true;
-            }
-        });
-*/
     }
 
     @Override
@@ -262,19 +144,13 @@ class ControlActivity extends AppCompatActivity {
             mBound = true;
         }
 
-        int width;
         int height;
 
         DisplayMetrics metrics = this.getResources().getDisplayMetrics();
-        width = metrics.widthPixels;
         height = metrics.heightPixels;
 
-        //Log.v("R.attr", String.format(Locale.US, "GridLayout dimensions = %d, %d", width, height));
-
         ViewGroup.LayoutParams taParams = findViewById(R.id.touch_area).getLayoutParams();
-        ViewGroup.LayoutParams fbParams = findViewById(R.id.feedback_text).getLayoutParams();
-        ViewGroup.LayoutParams thParams = findViewById(R.id.transport_home).getLayoutParams();
-        int newHeight = Math.round(height * 0.5f); // TODO: this is a kludge, fix layout
+        int newHeight = Math.round(height * 0.4f); // TODO: this is a kludge, fix layout
         taParams.height = newHeight;
         Log.d("TouchArea", taParams.toString());
     }
@@ -320,6 +196,20 @@ class ControlActivity extends AppCompatActivity {
             case R.id.transport_loop:
                 controller.toggle_loop();
                 break;
+            case R.id.strip_up:
+                switch (current_mode) {
+                    case MODE_FADER:
+                        current_mode = MODE_PAN;
+
+                        break;
+                    case MODE_PAN:
+                        break;
+                    case MODE_TRIM:
+                        break;
+                }
+                break;
+            case R.id.strip_down:
+                break;
             case R.id.next_strip:
                 controller.selectTrack(selected_strip + 1);
                 break;
@@ -349,7 +239,6 @@ class ControlActivity extends AppCompatActivity {
 
     class ResponseHandler extends Handler {
         final ControlActivity activity;
-        float saved_trk_rec_enable = 0.0f;
         int saved_global_rec_enable;
         int temp_strip;
 
@@ -369,6 +258,16 @@ class ControlActivity extends AppCompatActivity {
                 case CixListener.FB_SELECT:
                     selected_strip = message.getData().getInt(CS_ID, 0);
                     break;
+                case CixListener.FB_NAME:
+                    temp_strip = message.getData().getInt(CS_ID, 0);
+                    name = message.getData().getString(FeedbackTracker.CS_NAME, "not found");
+                    try {
+                        Toolbar toolbar = (Toolbar) this.activity.findViewById(R.id.my_toolbar);
+                        toolbar.setTitle("Oscixer  -  " + name);
+                    } catch (Exception e) {
+                        Log.e("FB_NAME", e.getMessage());
+                    }
+                    break;
                 case CixListener.FB_TRACK_RECENABLE:
                     temp_strip = message.getData().getInt(CS_ID, 0);
                     if (selected_strip == temp_strip) {
@@ -377,7 +276,6 @@ class ControlActivity extends AppCompatActivity {
                             try {
                                 ActionMenuItemView trk_enable = (ActionMenuItemView) findViewById(R.id.trackRecEnable);
                                 if (temp_rec_enable == 0.0f) {
-                                    //trk_enable.setIcon(R.drawable.track_rec_disabled);
                                     trk_enable.getItemData().setIcon(R.drawable.track_rec_disabled);
                                 } else {
                                     trk_enable.getItemData().setIcon(R.drawable.track_rec_enabled);
@@ -395,7 +293,6 @@ class ControlActivity extends AppCompatActivity {
                         try {
                             ActionMenuItemView global_enable = (ActionMenuItemView) findViewById(R.id.globalRecEnable);
                             if (temp_global_rec_enable == 0) {
-                                //trk_enable.setIcon(R.drawable.track_rec_disabled);
                                 global_enable.getItemData().setIcon(R.drawable.global_rec_disabled);
                             } else {
                                 global_enable.getItemData().setIcon(R.drawable.global_rec_enabled);
@@ -416,13 +313,25 @@ class ControlActivity extends AppCompatActivity {
 
                     if (selected_strip == temp_strip) {
                         strip = temp_strip;
-                        name = message.getData().getString(FeedbackTracker.CS_NAME, "not found");
-                        fader = message.getData().getFloat(FeedbackTracker.CS_FADER, 0.0f);
+
+                        switch (current_mode) {
+                            case MODE_FADER:
+                                fader = message.getData().getFloat(FeedbackTracker.CS_FADER, 0.0f);
+                                break;
+                            case MODE_TRIM:
+                                trim = message.getData().getFloat(FeedbackTracker.CS_TRIM, 0.0f);
+                                break;
+                            case MODE_PAN:
+                                pan_stereo_position = message.getData().getFloat(FeedbackTracker.CS_PAN_STERO_POSITION, 0.0f);
+                                break;
+                            default:
+                                Log.d("CIX", "Unhandled FB_STRIP mode");
+                        }
+
                         /*
                         String comment = message.getData().getString(FeedbackTracker.CS_COMMENT, "");
                         float mute = message.getData().getFloat(FeedbackTracker.CS_MUTE, 0.0f);
                         float solo = message.getData().getFloat(FeedbackTracker.CS_SOLO, 0.0f);
-                        float trim = message.getData().getFloat(FeedbackTracker.CS_TRIM, 0.0f);
                         float solo_iso = message.getData().getFloat(FeedbackTracker.CS_SOLO_ISO, 0.0f);
                         float solo_safe = message.getData().getFloat(FeedbackTracker.CS_SOLO_SAFE, 0.0f);
                         float polarity = message.getData().getFloat(FeedbackTracker.CS_POLARITY, 0.0f);
@@ -432,7 +341,7 @@ class ControlActivity extends AppCompatActivity {
                         float rec_safe = message.getData().getFloat(FeedbackTracker.CS_RECSAFE, 0.0f);
                         // TODO: findout what expanded is??
                         float expanded = message.getData().getFloat(FeedbackTracker.CS_EXPANDED, 0.0f);
-                        float pan_stereo_position = message.getData().getFloat(FeedbackTracker.CS_PAN_STERO_POSITION, 0.0f);
+                        float
                         float pan_stereo_width = message.getData().getFloat(FeedbackTracker.CS_PAN_STERO_WIDTH, 0.0f);
                         float num_inputs = message.getData().getFloat(FeedbackTracker.CS_NUM_INPUTS, 0.0f);
                         float num_outputs = message.getData().getFloat(FeedbackTracker.CS_NUM_OUTPUTS, 0.0f);
@@ -441,9 +350,6 @@ class ControlActivity extends AppCompatActivity {
 
                         try {
                             activity.textView.setText(Float.toString(fader));
-
-                            Toolbar toolbar = (Toolbar) this.activity.findViewById(R.id.my_toolbar);
-                            toolbar.setTitle("Oscixer  -  " + name);
                         } catch (Exception e) {
                             Log.e("STRIP", e.getMessage());
                         }
