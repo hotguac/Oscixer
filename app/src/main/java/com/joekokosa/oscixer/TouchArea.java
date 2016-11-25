@@ -1,6 +1,5 @@
 package com.joekokosa.oscixer;
 
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -13,7 +12,6 @@ class TouchArea implements View.OnTouchListener {
 
     private final ControlActivity controlActivity;
     private boolean first_point = true;
-    private float deltaX;
     private float lastX = 0.0f;
     private float lastY = 0.0f;
     private float last_value;
@@ -55,7 +53,7 @@ class TouchArea implements View.OnTouchListener {
                     case ControlActivity.MODE_FADER:
                         last_value = controlActivity.fader;
                         controlScale = 1.0f;
-                        minAdjust = 0.8f;
+                        minAdjust = 0.1f;
                         break;
                     case ControlActivity.MODE_PAN:
                         last_value = controlActivity.pan_stereo_position;
@@ -83,7 +81,7 @@ class TouchArea implements View.OnTouchListener {
 
                 velocity_scale = getVelocity_scale(velocity);
 
-                Log.d("--scale--", Float.toString(velocity_scale));
+                //Log.d("--scale--", Float.toString(velocity_scale));
 
                 for (int i = 0; i < event.getHistorySize(); i++) {
                     posX = event.getHistoricalAxisValue(0, i);
@@ -113,7 +111,11 @@ class TouchArea implements View.OnTouchListener {
         float avgY;
         float y_scale = 1.0f;
 
-        int mWidth = v.getLeft() - v.getRight();
+        int myWidth = 1000;
+        int left;
+        int right;
+        float deltaX = 0.0f;
+
         float maxY = v.getTop();
         float minY = v.getBottom();
 
@@ -129,12 +131,18 @@ class TouchArea implements View.OnTouchListener {
             lastX = posX;
             lastY = posY;
 
-            valueChange += velocity_scale * y_scale * (deltaX / mWidth) * controlScale;
+            left = v.getLeft();
+            right = v.getRight();
+
+            myWidth = right - left;
+
+            valueChange += velocity_scale * y_scale * (deltaX / myWidth) * controlScale;
+
         }
         next_value += valueChange;
 
         if (Math.abs(next_value - last_value) > minAdjust) {
-            Log.d("Fader change", String.format("%f deltaX =%f y_scale = %f lastfader = %f", valueChange, deltaX, y_scale, next_value));
+            //Log.d("--Touch Change--", Float.toString(valueChange) + " " + Float.toString(velocity_scale) + " " + Float.toString(y_scale) + " " + Float.toString(deltaX) + " " + Integer.toString(myWidth) + " " + Float.toString(controlScale));
 
             switch (controlActivity.current_mode) {
                 case ControlActivity.MODE_FADER:
@@ -158,15 +166,15 @@ class TouchArea implements View.OnTouchListener {
         float v_sq = velocity * velocity;
 
         if (v_sq < 5000) {
-            velocity_scale = 0.25f;
+            velocity_scale = 0.125f;
         } else if (v_sq < 80000) {
-            velocity_scale = 0.5f;
+            velocity_scale = 0.25f;
         } else if (v_sq < 800000) {
             velocity_scale = 1.0f;
         } else if (v_sq < 1000000) {
-            velocity_scale = 1.5f;
+            velocity_scale = 2.0f;
         } else {
-            velocity_scale = 3.0f;
+            velocity_scale = 4.0f;
         }
 
         return velocity_scale;
