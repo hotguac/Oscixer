@@ -16,12 +16,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.menu.ActionMenuItemView;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.net.DatagramSocket;
@@ -36,12 +35,13 @@ class ControlActivity extends AppCompatActivity {
     static final public int MODE_PAN = 1;
     static final public int MODE_TRIM = 2;
     static protected DawController controller;
+    static protected int selected_strip;
     static private DatagramSocket sock;
     protected Float fader;
     protected Float trim;
     protected Float pan_stereo_position;
-    protected Float last_fader;
-    protected int selected_strip;
+    protected int current_mode = MODE_FADER;
+    Messenger mService;
     private Messenger mMessenger;
     private TextView textView;
     /**
@@ -50,15 +50,15 @@ class ControlActivity extends AppCompatActivity {
     private boolean mBound = false;
     private int strip;
     private float rec_enable;
-    private int current_mode = MODE_FADER;
-
+    private ImageView touch_area;
     private ServiceConnection mConnection = new ServiceConnection() {
+
 
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
 
-            Messenger mService = new Messenger(service);
+            mService = new Messenger(service);
 
             try {
                 Message msg = Message.obtain(null, CixListener.MSG_REGISTER);
@@ -96,6 +96,8 @@ class ControlActivity extends AppCompatActivity {
 
         textView = (TextView) findViewById(R.id.feedback_text);
         textView.setText(msg);
+
+        touch_area = (ImageView) findViewById(R.id.touch_area);
 
         controller = new DawController();
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -143,16 +145,6 @@ class ControlActivity extends AppCompatActivity {
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             mBound = true;
         }
-
-        int height;
-
-        DisplayMetrics metrics = this.getResources().getDisplayMetrics();
-        height = metrics.heightPixels;
-
-        ViewGroup.LayoutParams taParams = findViewById(R.id.touch_area).getLayoutParams();
-        int newHeight = Math.round(height * 0.4f); // TODO: this is a kludge, fix layout
-        taParams.height = newHeight;
-        Log.d("TouchArea", taParams.toString());
     }
 
     @Override
@@ -200,15 +192,52 @@ class ControlActivity extends AppCompatActivity {
                 switch (current_mode) {
                     case MODE_FADER:
                         current_mode = MODE_PAN;
-
+                        touch_area.setImageResource(R.drawable.pan_stereo_pos);
                         break;
                     case MODE_PAN:
+                        current_mode = MODE_TRIM;
+
+                        touch_area.setImageResource(R.drawable.ta_trim);
                         break;
                     case MODE_TRIM:
                         break;
+                    default:
+                        break;
                 }
+                try {
+                    Message msg = Message.obtain(null, CixListener.MSG_SETMODE);
+                    msg.arg1 = current_mode;
+
+                    mService.send(msg);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+
                 break;
             case R.id.strip_down:
+                switch (current_mode) {
+                    case MODE_FADER:
+                        break;
+                    case MODE_PAN:
+                        current_mode = MODE_FADER;
+                        touch_area.setImageResource(R.drawable.ta_fader);
+                        break;
+                    case MODE_TRIM:
+                        current_mode = MODE_PAN;
+                        touch_area.setImageResource(R.drawable.pan_stereo_pos);
+                        break;
+                    default:
+                        break;
+                }
+                try {
+                    Message msg = Message.obtain(null, CixListener.MSG_SETMODE);
+                    msg.arg1 = current_mode;
+
+                    mService.send(msg);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+
                 break;
             case R.id.next_strip:
                 controller.selectTrack(selected_strip + 1);
@@ -249,11 +278,11 @@ class ControlActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message message) {
             switch (message.what) {
-                case CixListener.FB_GAIN:
+                case CixListener.FB_GAIN: // Is this used?
+                    String name = message.getData().getString(CS_NAME, "not found");
                     strip = message.getData().getInt(CS_ID, 0);
                     fader = message.getData().getFloat(CS_FADER, -999.0f);
-                    String name = message.getData().getString(CS_NAME, "not found");
-                    activity.textView.setText(Float.toString(fader));
+                    //activity.textView.setText(Float.toString(temp));
                     break;
                 case CixListener.FB_SELECT:
                     selected_strip = message.getData().getInt(CS_ID, 0);
@@ -317,12 +346,33 @@ class ControlActivity extends AppCompatActivity {
                         switch (current_mode) {
                             case MODE_FADER:
                                 fader = message.getData().getFloat(FeedbackTracker.CS_FADER, 0.0f);
+                                try {
+                                    float tmp = fader * 10;
+                                    Float temp = (float) (int) ((tmp - (int) tmp) >= 0.5f ? tmp + 1 : tmp) / 10;
+                                    activity.textView.setText(Float.toString(temp));
+                                } catch (Exception e) {
+                                    Log.e("STRIP", e.getMessage());
+                                }
                                 break;
                             case MODE_TRIM:
                                 trim = message.getData().getFloat(FeedbackTracker.CS_TRIM, 0.0f);
+                                try {
+                                    float tmp = trim * 10;
+                                    Float temp = (float) (int) ((tmp - (int) tmp) >= 0.5f ? tmp + 1 : tmp) / 10;
+                                    activity.textView.setText(Float.toString(temp));
+                                } catch (Exception e) {
+                                    Log.e("STRIP", e.getMessage());
+                                }
                                 break;
                             case MODE_PAN:
                                 pan_stereo_position = message.getData().getFloat(FeedbackTracker.CS_PAN_STERO_POSITION, 0.0f);
+                                try {
+                                    float tmp = pan_stereo_position * 100;
+                                    int right = (int) ((tmp - (int) tmp) >= 0.5f ? tmp + 1 : tmp);
+                                    activity.textView.setText("L: " + Integer.toString(100 - right) + "  R: " + Integer.toString(right));
+                                } catch (Exception e) {
+                                    Log.e("STRIP", e.getMessage());
+                                }
                                 break;
                             default:
                                 Log.d("CIX", "Unhandled FB_STRIP mode");
@@ -348,11 +398,6 @@ class ControlActivity extends AppCompatActivity {
 
                          */
 
-                        try {
-                            activity.textView.setText(Float.toString(fader));
-                        } catch (Exception e) {
-                            Log.e("STRIP", e.getMessage());
-                        }
                     }
                     break;
             }

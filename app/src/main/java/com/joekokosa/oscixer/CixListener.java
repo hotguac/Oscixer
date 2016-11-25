@@ -29,11 +29,11 @@ class CixListener extends Service {
 
     static final int MSG_REGISTER = 0;
     static final int MSG_SETMODE = 1;
-    private final FeedbackTracker fbTracker = new FeedbackTracker();
+    static private final FeedbackTracker fbTracker = new FeedbackTracker();
+    static private Messenger mActivity = null;
     private final Messenger mMessenger = new Messenger((new IncomingHandler(this)));
     private int current_mode = 0;
     private OSCPortIn oscportin;
-    private Messenger mActivity = null;
 
     private void setSocket(DatagramSocket sock) {
         oscportin = new OSCPortIn(sock);
@@ -89,6 +89,17 @@ class CixListener extends Service {
                         }
                     }
                     break;
+                case "/strip/pan_stereo_position":
+                case "/select/pan_stereo_position":
+                    // 0 = full left; 0.5 = center; 1.0 = full right
+                    if (strip > 0) {
+                        psp = (Float) message.getArguments().get(argnum);
+                        fbTracker.setPanStereoPosition(strip, psp);
+                        if (current_mode == ControlActivity.MODE_PAN) {
+                            updateStripFloat(strip, FeedbackTracker.CS_PAN_STERO_POSITION, psp);
+                        }
+                    }
+                    break;
                 case "/strip/name":
                     // TODO: Select form seems to pass in single space for name - add to Ardour mantis?
                 case "/select/name":
@@ -125,17 +136,6 @@ class CixListener extends Service {
                     //fbTracker.setExpand(strip, expand);
                     //updateFader(strip);
                     break;
-                        /*
-                        V/listenerError: /strip/monitor_input [1, 0.0]
-E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to java.lang.Integer
-E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to java.lang.Integer
-V/Message:: /strip/gui_select [1, 0.0]
-V/listenerError: /strip/monitor_input [2, 0.0]
-E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to java.lang.Integer
-V/listenerError: /strip/monitor_disk [2, 0.0]
-E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to java.lang.Integer
-
-                         */
                 case "/strip/monitor_input":
                     yn = (int) message.getArguments().get(argnum);
                     //fbTracker.setMonitorInput(strip, yn * 1.0f);
@@ -165,12 +165,6 @@ E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to jav
                 case "/select/record_safe":
                     rec_safe = (Float) message.getArguments().get(argnum);
                     //fbTracker.setRecordSafe(strip, rec_safe);
-                    //updateFader(strip);
-                    break;
-                case "/strip/pan_stereo_position":
-                case "/select/pan_stereo_position":
-                    psp = (Float) message.getArguments().get(argnum);
-                    //fbTracker.setPSP(strip, psp);
                     //updateFader(strip);
                     break;
                 case "/select/n_inputs":
@@ -383,6 +377,9 @@ E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to jav
 
         @Override
         public void handleMessage(Message msg) {
+            Message outmsg;
+            Bundle bundle;
+
             switch (msg.what) {
                 case MSG_REGISTER:
                     // Provides target to send messages back to Control Activity
@@ -395,6 +392,48 @@ E/Exception: java.lang.ClassCastException: java.lang.Float cannot be cast to jav
                     break;
                 case MSG_SETMODE:
                     cix.current_mode = msg.arg1;
+                    switch (cix.current_mode) {
+                        case ControlActivity.MODE_FADER:
+                            outmsg = Message.obtain(null, FB_STRIP);
+                            bundle = new Bundle();
+                            bundle.putInt(FeedbackTracker.CS_ID, ControlActivity.selected_strip);
+                            bundle.putFloat(FeedbackTracker.CS_FADER, fbTracker.getFader(ControlActivity.selected_strip));
+                            outmsg.setData(bundle);
+                            try {
+                                mActivity.send(outmsg);
+                            } catch (Exception e) {
+                                //
+                            }
+                            break;
+                        case ControlActivity.MODE_PAN:
+                            outmsg = Message.obtain(null, FB_STRIP);
+                            bundle = new Bundle();
+                            bundle.putInt(FeedbackTracker.CS_ID, ControlActivity.selected_strip);
+                            bundle.putFloat(FeedbackTracker.CS_PAN_STERO_POSITION, fbTracker.getPanStereoPosition(ControlActivity.selected_strip));
+                            outmsg.setData(bundle);
+                            try {
+                                mActivity.send(outmsg);
+                            } catch (Exception e) {
+                                //
+                            }
+                            break;
+                        case ControlActivity.MODE_TRIM:
+                            outmsg = Message.obtain(null, FB_STRIP);
+                            bundle = new Bundle();
+                            bundle.putInt(FeedbackTracker.CS_ID, ControlActivity.selected_strip);
+                            bundle.putFloat(FeedbackTracker.CS_TRIM, fbTracker.getTrim(ControlActivity.selected_strip));
+                            outmsg.setData(bundle);
+                            try {
+                                mActivity.send(outmsg);
+                            } catch (Exception e) {
+                                //
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+
+                default:
                     break;
             }
         }

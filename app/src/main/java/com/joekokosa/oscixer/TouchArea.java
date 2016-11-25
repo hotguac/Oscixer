@@ -11,33 +11,33 @@ import android.view.View;
 
 class TouchArea implements View.OnTouchListener {
 
-    private ControlActivity controlActivity;
+    private final ControlActivity controlActivity;
+    private boolean first_point = true;
+    private float deltaX;
+    private float lastX = 0.0f;
+    private float lastY = 0.0f;
+    private float last_value;
+    private float next_value;
+    private float valueChange = 0.0f;
+    private float controlScale = 1.0f;
+    private float minAdjust = 0.1f;
     private VelocityTracker mVelocityTracker = null;
 
     public TouchArea(ControlActivity controlActivity) {
         this.controlActivity = controlActivity;
     }
 
+    // TODO: handle multi-touch
+    /*
+       Skip the positions in the event historical functions to keep the UI responsive.
+    */
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        // ... Respond to touch events
-        int index = event.getActionIndex();
         int action = event.getActionMasked();
+        float velocity_scale;
 
-        int mWidth = v.getLeft() - v.getRight();
-        int mHeight = v.getTop() - v.getBottom();
-        boolean first_point = true;
-        float deltaX;
-        float lastX = 0.0f;
-        float lastY = 0.0f;
         float posX;
         float posY;
-        float avgY;
-        float faderChange = 0.0f;
-        float velocity_scale = 1.0f;
-        float y_scale = 1.0f;
-        float maxY = v.getTop();
-        float minY = v.getBottom();
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
@@ -51,65 +51,49 @@ class TouchArea implements View.OnTouchListener {
                 // Add a user's movement to the tracker.
                 mVelocityTracker.addMovement(event);
                 first_point = true;
-                controlActivity.last_fader = controlActivity.fader;
+                switch (controlActivity.current_mode) {
+                    case ControlActivity.MODE_FADER:
+                        last_value = controlActivity.fader;
+                        controlScale = 1.0f;
+                        minAdjust = 0.8f;
+                        break;
+                    case ControlActivity.MODE_PAN:
+                        last_value = controlActivity.pan_stereo_position;
+                        controlScale = 0.08f;
+                        minAdjust = 0.01f;
+                        break;
+                    case ControlActivity.MODE_TRIM:
+                        last_value = controlActivity.trim;
+                        controlScale = 0.8f;
+                        minAdjust = 0.1f;
+                        break;
+                }
+
+                next_value = last_value;
                 break;
             case MotionEvent.ACTION_MOVE:
+
                 mVelocityTracker.addMovement(event);
                 // When you want to determine the velocity, call
                 // computeCurrentVelocity(). Then call getXVelocity()
                 // and getYVelocity() to retrieve the velocity for each pointer ID.
                 mVelocityTracker.computeCurrentVelocity(1000);
-                // Log velocity of pixels per second
-                // Best practice to use VelocityTrackerCompat where possible.
-                // TODO: handle multi-touch
-                int nhist = event.getHistorySize();
+                float velocity = mVelocityTracker.getXVelocity();
+                //Log.d("--velocity--", Float.toString(velocity));
 
-                //Log.d("Fader change", String.format("num hist = %d", nhist));
-                for (int idx = 0; idx < nhist; idx++) {
-                    posX = event.getHistoricalAxisValue(0, idx);
-                    posY = event.getHistoricalAxisValue(1, idx);
+                velocity_scale = getVelocity_scale(velocity);
 
-                    if (first_point) {
-                        first_point = false;
-                        lastX = posX;
-                        lastY = posY;
-                    } else {
-                        deltaX = posX - lastX;
-                        avgY = (lastY + posY) / 2.0f;
-                        y_scale = (avgY - minY) / (maxY - minY) * (20.0f - 0.5f) + 0.5f;
-                        faderChange += velocity_scale * y_scale * (deltaX / mWidth);
-                        if ((faderChange > 0.05f) || (faderChange < -0.05f)) {
-                            Log.d("Fader change", String.format("%f deltaX =%f avgY = %f y_scale = %f lastfader = %f", faderChange, deltaX, avgY, y_scale, controlActivity.last_fader));
-                            controlActivity.last_fader += faderChange;
-                            controlActivity.controller.moveFader(controlActivity.selected_strip, controlActivity.last_fader);
-                            faderChange = 0.0f;
-                        }
-                        lastX = posX;
-                        lastY = posY;
-                    }
+                Log.d("--scale--", Float.toString(velocity_scale));
+
+                for (int i = 0; i < event.getHistorySize(); i++) {
+                    posX = event.getHistoricalAxisValue(0, i);
+                    posY = event.getHistoricalAxisValue(1, i);
+                    calcFaderChange(posX, posY, velocity_scale, v);
                 }
 
                 posX = event.getAxisValue(0);
                 posY = event.getAxisValue(1);
-
-                if (first_point) {
-                    first_point = false;
-                    lastX = posX;
-                    lastY = posY;
-                } else {
-                    deltaX = posX - lastX;
-                    avgY = (lastY + posY) / 2.0f;
-                    y_scale = (avgY - minY) / (maxY - minY) * (20.0f - 0.5f) + 0.5f;
-                    faderChange += velocity_scale * y_scale * (deltaX / mWidth);
-                    if ((faderChange > 0.05f) || (faderChange < -0.05f)) {
-                        Log.d("Fader change", String.format("%f deltaX =%f avgY = %f y_scale = %f lastfader = %f", faderChange, deltaX, avgY, y_scale, controlActivity.last_fader));
-                        controlActivity.last_fader += faderChange;
-                        controlActivity.controller.moveFader(controlActivity.selected_strip, controlActivity.last_fader);
-                        faderChange = 0.0f;
-                    }
-                    lastX = posX;
-                    lastY = posY;
-                }
+                calcFaderChange(posX, posY, velocity_scale, v);
 
                 break;
             case MotionEvent.ACTION_UP:
@@ -123,5 +107,68 @@ class TouchArea implements View.OnTouchListener {
         }
 
         return true;
+    }
+
+    private void calcFaderChange(float posX, float posY, float velocity_scale, View v) {
+        float avgY;
+        float y_scale = 1.0f;
+
+        int mWidth = v.getLeft() - v.getRight();
+        float maxY = v.getTop();
+        float minY = v.getBottom();
+
+        if (first_point) {
+            first_point = false;
+            lastX = posX;
+            lastY = posY;
+            valueChange = 0.0f;
+        } else {
+            deltaX = posX - lastX;
+            avgY = (lastY + posY) / 2.0f;
+            y_scale = (((avgY - minY) / (maxY - minY)) * (4.0f - 0.04f)) + 0.04f;
+            lastX = posX;
+            lastY = posY;
+
+            valueChange += velocity_scale * y_scale * (deltaX / mWidth) * controlScale;
+        }
+        next_value += valueChange;
+
+        if (Math.abs(next_value - last_value) > minAdjust) {
+            Log.d("Fader change", String.format("%f deltaX =%f y_scale = %f lastfader = %f", valueChange, deltaX, y_scale, next_value));
+
+            switch (controlActivity.current_mode) {
+                case ControlActivity.MODE_FADER:
+                    ControlActivity.controller.moveFader(controlActivity.selected_strip, next_value);
+                    break;
+                case ControlActivity.MODE_PAN:
+                    ControlActivity.controller.movePan(controlActivity.selected_strip, next_value);
+                    break;
+                case ControlActivity.MODE_TRIM:
+                    ControlActivity.controller.moveTrim(controlActivity.selected_strip, next_value);
+                    break;
+            }
+
+            last_value = next_value;
+            valueChange = 0.0f;
+        }
+    }
+
+    private float getVelocity_scale(float velocity) {
+        float velocity_scale;
+        float v_sq = velocity * velocity;
+
+        if (v_sq < 5000) {
+            velocity_scale = 0.25f;
+        } else if (v_sq < 80000) {
+            velocity_scale = 0.5f;
+        } else if (v_sq < 800000) {
+            velocity_scale = 1.0f;
+        } else if (v_sq < 1000000) {
+            velocity_scale = 1.5f;
+        } else {
+            velocity_scale = 3.0f;
+        }
+
+        return velocity_scale;
     }
 }

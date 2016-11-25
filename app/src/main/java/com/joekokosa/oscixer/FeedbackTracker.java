@@ -76,6 +76,16 @@ class FeedbackTracker {
         }
     }
 
+    void setPanStereoPosition(int trackID, float pan) {
+        if (trackID > 0) {
+            if (audio_tracks[trackID] == null) {
+                audio_tracks[trackID] = new ChannelStrip();
+            }
+
+            audio_tracks[trackID].panStereoPosition = pan;
+        }
+    }
+
     void setTrackName(int trackID, String name) {
         if (audio_tracks[trackID] == null) {
             audio_tracks[trackID] = new ChannelStrip();
@@ -125,7 +135,23 @@ class FeedbackTracker {
             audio_tracks[strip] = new ChannelStrip();
         }
 
-        audio_tracks[strip].fader = trim;
+        audio_tracks[strip].trim = trim;
+    }
+
+    public float getPanStereoPosition(int stripID) {
+        if (audio_tracks[stripID] != null) {
+            return audio_tracks[stripID].panStereoPosition;
+        } else {
+            return -999.99f;
+        }
+    }
+
+    public float getTrim(int stripID) {
+        if (audio_tracks[stripID] != null) {
+            return audio_tracks[stripID].trim;
+        } else {
+            return 0.0f;
+        }
     }
 }
 

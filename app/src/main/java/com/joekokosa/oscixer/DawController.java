@@ -183,4 +183,30 @@ class DawController {
             // Error handling for some error
         }
     }
+
+    public void movePan(int trackID, float position) {
+        try {
+            ArrayList<Object> moreThingsToSend = new ArrayList<>();
+            moreThingsToSend.add(trackID);
+            moreThingsToSend.add(position);
+            OSCMessage message2 = new OSCMessage("/strip/pan_stereo_position", moreThingsToSend);
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
+
+    public void moveTrim(int trackID, float gain) {
+        try {
+            ArrayList<Object> moreThingsToSend = new ArrayList<>();
+            moreThingsToSend.add(trackID);
+            moreThingsToSend.add(gain);
+            OSCMessage message2 = new OSCMessage("/strip/trimdB", moreThingsToSend);
+
+            oscPortOut.send(message2);
+        } catch (Exception e) {
+            // Error handling for some error
+        }
+    }
 }
