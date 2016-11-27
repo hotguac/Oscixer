@@ -51,7 +51,7 @@ class CixListener extends Service {
     private void process_message(Date time, OSCMessage message) {
         int strip = -1;
         int argnum = 0;
-        int yn; // 0-disable / 1-enable
+        Float yn; // 0-disable / 1-enable
         Float rec_enable;
         Float rec_safe;
         Float trim;
@@ -65,6 +65,12 @@ class CixListener extends Service {
                 argnum = 1;
             } else if (myAddress.startsWith("/select/")) {
                 strip = fbTracker.getSelected();
+                if (strip == 0) {
+                    int temp = fbTracker.getValidTrackID();
+                    if (temp != 0) {
+                        ControlActivity.controller.selectTrack(temp);
+                    }
+                }
                 argnum = 0;
             }
 
@@ -108,7 +114,6 @@ class CixListener extends Service {
                         fbTracker.setTrackName(strip, temp_name);
                         updateStripName(strip, temp_name);
                     }
-                    //updateFader(strip);
                     break;
                 case "/strip/select":
                     Float select = (Float) message.getArguments().get(argnum);
@@ -116,86 +121,70 @@ class CixListener extends Service {
                     if (select == 1.0f) {
                         selectStrip(strip);
                     }
-                    //updateFader(strip);
                     break;
                 case "/strip/mute":
                 case "/select/mute":
                     Float mute = (Float) message.getArguments().get(argnum);
                     fbTracker.setMute(strip, mute);
-                    //updateFader(strip);
                     break;
                 case "/strip/solo":
                 case "/select/solo":
                     Float solo = (Float) message.getArguments().get(argnum);
                     fbTracker.setSolo(strip, solo);
-                    //updateFader(strip);
                     break;
                 case "/strip/expand":
                 case "/select/expand":
                     Float expand = (Float) message.getArguments().get(argnum);
-                    //fbTracker.setExpand(strip, expand);
-                    //updateFader(strip);
                     break;
                 case "/strip/monitor_input":
-                    yn = (int) message.getArguments().get(argnum);
-                    //fbTracker.setMonitorInput(strip, yn * 1.0f);
-                    //updateFader(strip);
+                    if (Integer.class.isInstance(message.getArguments().get(argnum))) {
+                        yn = (int) message.getArguments().get(argnum) * 1.0f;
+                    } else {
+                        yn = (Float) message.getArguments().get(argnum);
+                    }
                     break;
                 case "/select/monitor_input":
                     Float mon_in = (Float) message.getArguments().get(argnum);
-                    //updateFader(strip);
                     break;
                 case "/strip/monitor_disk":
-                    yn = (int) message.getArguments().get(argnum);
-                    //fbTracker.setMonitorDisk(strip, yn * 1.0f);
-                    //updateFader(strip);
+                    if (Integer.class.isInstance(message.getArguments().get(argnum))) {
+                        yn = (int) message.getArguments().get(argnum) * 1.0f;
+                    } else {
+                        yn = (Float) message.getArguments().get(argnum);
+                    }
                     break;
                 case "/select/monitor_disk":
                     Float mon_disk = (Float) message.getArguments().get(argnum);
-                    //fbTracker.setMonitorDisk(strip, mon_disk);
-                    //updateFader(strip);
                     break;
                 case "/strip/recenable":
                 case "/select/recenable":
-                    rec_enable = (Float) message.getArguments().get(argnum);
-                    fbTracker.setRecordEnable(strip, rec_enable);
-                    recEnableStrip(strip, rec_enable);
+                    if (strip > 0) {
+                        rec_enable = (Float) message.getArguments().get(argnum);
+                        fbTracker.setRecordEnable(strip, rec_enable);
+                        recEnableStrip(strip, rec_enable);
+                    }
                     break;
                 case "/strip/record_safe":
                 case "/select/record_safe":
                     rec_safe = (Float) message.getArguments().get(argnum);
-                    //fbTracker.setRecordSafe(strip, rec_safe);
-                    //updateFader(strip);
                     break;
                 case "/select/n_inputs":
                     Float n_inputs = (Float) message.getArguments().get(argnum);
-                    //fbTracker.setNumInputs(strip, n_inputs);
-                    //updateFader(strip);
                     break;
                 case "/select/n_outputs":
                     Float n_outputs = (Float) message.getArguments().get(argnum);
-                    //fbTracker.setNumOutputs(strip, n_outputs);
-                    //updateFader(strip);
                     break;
                 case "/select/solo_iso":
                     Float solo_iso = (Float) message.getArguments().get(argnum);
-                    //fbTracker.setSoloIso(strip, solo_iso);
-                    //updateFader(strip);
                     break;
                 case "/select/solo_safe":
                     Float solo_safe = (Float) message.getArguments().get(argnum);
-                    //fbTracker.setSoloSafe(strip, solo_safe);
-                    //updateFader(strip);
                     break;
                 case "/select/comment":
                     String comment = (String) message.getArguments().get(argnum);
-                    //fbTracker.setComment(strip, comment);
-                    //updateFader(strip);
                     break;
                 case "/select/polarity":
                     Float polarity = (Float) message.getArguments().get(argnum);
-                    //fbTracker.setPolarity(strip, polarity);
-                    //updateFader(strip);
                     break;
                 case "/rec_enable_toggle":
                     int global_rec_enable = (int) message.getArguments().get(0);
@@ -276,7 +265,7 @@ class CixListener extends Service {
         try {
             mActivity.send(msg);
         } catch (Exception e) {
-            //
+            e.printStackTrace();
         }
     }
 
@@ -291,41 +280,8 @@ class CixListener extends Service {
             mActivity.send(msg);
         } catch (Exception e) {
             Log.e("updateStripName", e.getMessage());
+            e.printStackTrace();
         }
-    }
-
-    private void updateFader(final int stripID) { // TODO: need to communicate back to UI
-        Message msg = Message.obtain(null, FB_STRIP);
-        Bundle bundle = new Bundle();
-        bundle.putInt(FeedbackTracker.CS_ID, stripID);
-        bundle.putString(FeedbackTracker.CS_NAME, fbTracker.getTrackName(stripID));
-        bundle.putFloat(FeedbackTracker.CS_FADER, fbTracker.getFader(stripID));
-        /*
-        bundle.putFloat(FeedbackTracker.CS_MUTE, fbTracker.getMute(stripID));
-        bundle.putFloat(FeedbackTracker.CS_SOLO, fbTracker.getSolo(stripID));
-        bundle.putFloat(FeedbackTracker.CS_SOLO_ISO, fbTracker.getSoloIso(stripID));
-        bundle.putFloat(FeedbackTracker.CS_SOLO_SAFE, fbTracker.getSoloSafe(stripID));
-        bundle.putString(FeedbackTracker.CS_COMMENT, fbTracker.getComment(stripID));
-
-        bundle.putFloat(FeedbackTracker.CS_POLARITY, fbTracker.getPolarity(stripID));
-        bundle.putFloat(FeedbackTracker.CS_MONITOR_INPUT, fbTracker.getMonitorInput(stripID));
-        bundle.putFloat(FeedbackTracker.CS_MONITOR_DISK, fbTracker.getMonitorDisk(stripID));
-        bundle.putFloat(FeedbackTracker.CS_TRACK_RECENABLE, fbTracker.getRecEnable(stripID));
-        bundle.putFloat(FeedbackTracker.CS_RECSAFE, fbTracker.getRecSafe(stripID));
-        bundle.putFloat(FeedbackTracker.CS_EXPANDED, fbTracker.getExpanded(stripID));
-        bundle.putFloat(FeedbackTracker.CS_TRIM, fbTracker.getTrim(stripID));
-        bundle.putFloat(FeedbackTracker.CS_PAN_STERO_POSITION, fbTracker.getPanStereoPosition(stripID));
-        bundle.putFloat(FeedbackTracker.CS_NUM_INPUTS, fbTracker.getNumInputs(stripID));
-        bundle.putFloat(FeedbackTracker.CS_NUM_OUTPUTS, fbTracker.getNumOutputs(stripID));
-        */
-
-        msg.setData(bundle);
-        try {
-            mActivity.send(msg);
-        } catch (Exception e) {
-            //
-        }
-
     }
 
     private void selectStrip(final int stripID) { // TODO: need to communicate back to UI
@@ -337,7 +293,7 @@ class CixListener extends Service {
         try {
             mActivity.send(msg);
         } catch (Exception e) {
-            //
+            e.printStackTrace();
         }
     }
 
@@ -351,7 +307,7 @@ class CixListener extends Service {
         try {
             mActivity.send(msg);
         } catch (Exception e) {
-            //
+            e.printStackTrace();
         }
 
     }
@@ -363,7 +319,7 @@ class CixListener extends Service {
         try {
             mActivity.send(msg);
         } catch (Exception e) {
-            //
+            e.printStackTrace();
         }
     }
 
@@ -383,7 +339,7 @@ class CixListener extends Service {
             switch (msg.what) {
                 case MSG_REGISTER:
                     // Provides target to send messages back to Control Activity
-                    cix.mActivity = msg.replyTo;
+                    mActivity = msg.replyTo;
                     // The socket created by DawController. Ardour will reply to this socket.
                     DatagramSocket sock = (DatagramSocket) msg.obj;
 
@@ -402,7 +358,7 @@ class CixListener extends Service {
                             try {
                                 mActivity.send(outmsg);
                             } catch (Exception e) {
-                                //
+                                e.printStackTrace();
                             }
                             break;
                         case ControlActivity.MODE_PAN:
@@ -414,7 +370,7 @@ class CixListener extends Service {
                             try {
                                 mActivity.send(outmsg);
                             } catch (Exception e) {
-                                //
+                                e.printStackTrace();
                             }
                             break;
                         case ControlActivity.MODE_TRIM:
@@ -426,7 +382,7 @@ class CixListener extends Service {
                             try {
                                 mActivity.send(outmsg);
                             } catch (Exception e) {
-                                //
+                                e.printStackTrace();
                             }
                             break;
                         default:

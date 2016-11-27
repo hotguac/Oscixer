@@ -5,16 +5,17 @@ package com.joekokosa.oscixer;
  */
 
 class FeedbackTracker {
+    public static final int MAX_TRACKS = 512;
     /*
-    Audio Tracks
-    Midi Tracks
-    Audio + Midi Tracks
-    Audio Busses
-    Midi Busses
-    VCA Masters
-    Master 2-Bus
-    Monitor Section
-     */
+        Audio Tracks
+        Midi Tracks
+        Audio + Midi Tracks
+        Audio Busses
+        Midi Busses
+        VCA Masters
+        Master 2-Bus
+        Monitor Section
+         */
     static final String CS_ID = "id";
     static final String CS_NAME = "name";
     static final String CS_FADER = "fader";
@@ -23,7 +24,6 @@ class FeedbackTracker {
     static final String CS_SOLO_ISO = "solo_iso";
     static final String CS_SOLO_SAFE = "solo_safe";
     static final String CS_COMMENT = "comment";
-
     static final String CS_POLARITY = "polarity";
     static final String CS_MONITOR_INPUT = "monitor_input";
     static final String CS_MONITOR_DISK = "monitor_disk";
@@ -39,15 +39,12 @@ class FeedbackTracker {
     static final String CS_SEND_ENABLE = "send_enable";
     static final String CS_NUM_INPUTS = "num_inputs";
     static final String CS_NUM_OUTPUTS = "num_outputs";
-
+    public static int selected_track;
     //private final ArrayList<ChannelStrip> audio_tracks;
     private final ChannelStrip[] audio_tracks;
 
-    private int selected_track;
-
     public FeedbackTracker() {
-        //audio_tracks = new ArrayList<>(256);
-        audio_tracks = new ChannelStrip[512];
+        audio_tracks = new ChannelStrip[MAX_TRACKS];
     }
 
     float getFader(int stripID) {
@@ -104,6 +101,18 @@ class FeedbackTracker {
 
     int getSelected() {
         return selected_track;
+    }
+
+    int getValidTrackID() {
+        int validID = 0;
+        for (int id = 1; id < MAX_TRACKS; id++) {
+            if (audio_tracks[id] != null) {
+                validID = id;
+                break;
+            }
+        }
+
+        return validID;
     }
 
     void setMute(int trackID, Float mute) {

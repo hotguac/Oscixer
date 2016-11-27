@@ -77,11 +77,7 @@ class TouchArea implements View.OnTouchListener {
                 // and getYVelocity() to retrieve the velocity for each pointer ID.
                 mVelocityTracker.computeCurrentVelocity(1000);
                 float velocity = mVelocityTracker.getXVelocity();
-                //Log.d("--velocity--", Float.toString(velocity));
-
                 velocity_scale = getVelocity_scale(velocity);
-
-                //Log.d("--scale--", Float.toString(velocity_scale));
 
                 for (int i = 0; i < event.getHistorySize(); i++) {
                     posX = event.getHistoricalAxisValue(0, i);
@@ -109,12 +105,12 @@ class TouchArea implements View.OnTouchListener {
 
     private void calcFaderChange(float posX, float posY, float velocity_scale, View v) {
         float avgY;
-        float y_scale = 1.0f;
+        float y_scale;
 
-        int myWidth = 1000;
+        int myWidth;
         int left;
         int right;
-        float deltaX = 0.0f;
+        float deltaX;
 
         float maxY = v.getTop();
         float minY = v.getBottom();
@@ -137,22 +133,20 @@ class TouchArea implements View.OnTouchListener {
             myWidth = right - left;
 
             valueChange += velocity_scale * y_scale * (deltaX / myWidth) * controlScale;
-
         }
+
         next_value += valueChange;
 
         if (Math.abs(next_value - last_value) > minAdjust) {
-            //Log.d("--Touch Change--", Float.toString(valueChange) + " " + Float.toString(velocity_scale) + " " + Float.toString(y_scale) + " " + Float.toString(deltaX) + " " + Integer.toString(myWidth) + " " + Float.toString(controlScale));
-
             switch (controlActivity.current_mode) {
                 case ControlActivity.MODE_FADER:
-                    ControlActivity.controller.moveFader(controlActivity.selected_strip, next_value);
+                    ControlActivity.controller.moveFader(ControlActivity.selected_strip, next_value);
                     break;
                 case ControlActivity.MODE_PAN:
-                    ControlActivity.controller.movePan(controlActivity.selected_strip, next_value);
+                    ControlActivity.controller.movePan(ControlActivity.selected_strip, next_value);
                     break;
                 case ControlActivity.MODE_TRIM:
-                    ControlActivity.controller.moveTrim(controlActivity.selected_strip, next_value);
+                    ControlActivity.controller.moveTrim(ControlActivity.selected_strip, next_value);
                     break;
             }
 

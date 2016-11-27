@@ -26,6 +26,7 @@ class DawController {
             oscPortOut.send(message);
         } catch (Exception e) {
             //return;
+            e.printStackTrace();
         }
     }
 
@@ -35,7 +36,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -45,7 +46,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -55,7 +56,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -65,7 +66,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -75,7 +76,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -85,7 +86,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -97,7 +98,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -110,7 +111,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -123,7 +124,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -136,7 +137,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -161,7 +162,6 @@ class DawController {
         moreThingsToSend.add(8211); // feed back
         moreThingsToSend.add(0); // gain mode
 
-        //OSCMessage message = new OSCMessage("/transport_play", Arrays.asList(thingsToSend));
         OSCMessage message = new OSCMessage("/set_surface", moreThingsToSend);
 
         try {
@@ -180,7 +180,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -193,7 +193,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 
@@ -206,7 +206,7 @@ class DawController {
 
             oscPortOut.send(message2);
         } catch (Exception e) {
-            // Error handling for some error
+            e.printStackTrace();
         }
     }
 }

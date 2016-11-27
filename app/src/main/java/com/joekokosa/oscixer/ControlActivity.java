@@ -27,31 +27,22 @@ import java.net.DatagramSocket;
 
 import static com.joekokosa.oscixer.FeedbackTracker.CS_FADER;
 import static com.joekokosa.oscixer.FeedbackTracker.CS_ID;
-import static com.joekokosa.oscixer.FeedbackTracker.CS_NAME;
 import static com.joekokosa.oscixer.MainActivity.EXTRA_MESSAGE;
 
 class ControlActivity extends AppCompatActivity {
     static final public int MODE_FADER = 0;
     static final public int MODE_PAN = 1;
     static final public int MODE_TRIM = 2;
-    static protected DawController controller;
-    static protected int selected_strip;
+    static DawController controller;
+    static int selected_strip;
     static private DatagramSocket sock;
-    protected Float fader;
-    protected Float trim;
-    protected Float pan_stereo_position;
-    protected int current_mode = MODE_FADER;
-    Messenger mService;
+    Float fader;
+    Float trim;
+    Float pan_stereo_position;
+    int current_mode = MODE_FADER;
+    private Messenger mService;
     private Messenger mMessenger;
-    private TextView textView;
-    /**
-     * Defines callbacks for service binding, passed to bindService()
-     */
-    private boolean mBound = false;
-    private int strip;
-    private float rec_enable;
-    private ImageView touch_area;
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private final ServiceConnection mConnection = new ServiceConnection() {
 
 
         @Override
@@ -78,6 +69,14 @@ class ControlActivity extends AppCompatActivity {
         }
 
     };
+    private TextView textView;
+    /**
+     * Defines callbacks for service binding, passed to bindService()
+     */
+    private boolean mBound = false;
+    private int strip;
+    private float rec_enable;
+    private ImageView touch_area;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +88,12 @@ class ControlActivity extends AppCompatActivity {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-        getSupportActionBar().openOptionsMenu();
+        try {
+            getSupportActionBar().openOptionsMenu();
+        } catch (NullPointerException e) {
+            Log.e("ControlActivity", e.getMessage());
+            e.printStackTrace();
+        }
 
         Intent intent = getIntent();
         String msg = intent.getStringExtra(EXTRA_MESSAGE);
@@ -111,6 +115,7 @@ class ControlActivity extends AppCompatActivity {
         } catch (Exception e) {
             // TODO: update port in the shared prefs to be default value
             port = 3819;
+            e.printStackTrace();
         } finally {
             sock = controller.attachPorts(target_host, port);
         }
@@ -145,6 +150,9 @@ class ControlActivity extends AppCompatActivity {
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             mBound = true;
         }
+        selected_strip = 0;
+        FeedbackTracker.selected_track = 0;
+        controller.connectSurface();
     }
 
     @Override
@@ -165,7 +173,7 @@ class ControlActivity extends AppCompatActivity {
         }
     }
 
-    void onClicks(View view) {
+    public void onClicks(View view) {
         switch (view.getId()) {
             case R.id.transport_play:
                 controller.startTransport();
@@ -248,7 +256,7 @@ class ControlActivity extends AppCompatActivity {
         }
     }
 
-    void menuClick(MenuItem item) {
+    public void menuClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.globalRecEnable:
                 controller.globalRecordEnable();
@@ -270,6 +278,7 @@ class ControlActivity extends AppCompatActivity {
         final ControlActivity activity;
         int saved_global_rec_enable;
         int temp_strip;
+        String name;
 
         ResponseHandler(ControlActivity activity) {
             this.activity = activity;
@@ -279,10 +288,8 @@ class ControlActivity extends AppCompatActivity {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case CixListener.FB_GAIN: // Is this used?
-                    String name = message.getData().getString(CS_NAME, "not found");
                     strip = message.getData().getInt(CS_ID, 0);
                     fader = message.getData().getFloat(CS_FADER, -999.0f);
-                    //activity.textView.setText(Float.toString(temp));
                     break;
                 case CixListener.FB_SELECT:
                     selected_strip = message.getData().getInt(CS_ID, 0);
@@ -295,6 +302,7 @@ class ControlActivity extends AppCompatActivity {
                         toolbar.setTitle("Oscixer  -  " + name);
                     } catch (Exception e) {
                         Log.e("FB_NAME", e.getMessage());
+                        e.printStackTrace();
                     }
                     break;
                 case CixListener.FB_TRACK_RECENABLE:
@@ -311,6 +319,7 @@ class ControlActivity extends AppCompatActivity {
                                 }
                             } catch (Exception e) {
                                 Log.e("Recenable", e.getMessage());
+                                e.printStackTrace();
                             }
                         }
                         rec_enable = temp_rec_enable;
@@ -328,6 +337,7 @@ class ControlActivity extends AppCompatActivity {
                             }
                         } catch (Exception e) {
                             Log.e("Recenable", e.getMessage());
+                            e.printStackTrace();
                         }
                     }
                     saved_global_rec_enable = temp_global_rec_enable;
@@ -352,6 +362,7 @@ class ControlActivity extends AppCompatActivity {
                                     activity.textView.setText(Float.toString(temp));
                                 } catch (Exception e) {
                                     Log.e("STRIP", e.getMessage());
+                                    e.printStackTrace();
                                 }
                                 break;
                             case MODE_TRIM:
@@ -362,6 +373,7 @@ class ControlActivity extends AppCompatActivity {
                                     activity.textView.setText(Float.toString(temp));
                                 } catch (Exception e) {
                                     Log.e("STRIP", e.getMessage());
+                                    e.printStackTrace();
                                 }
                                 break;
                             case MODE_PAN:
@@ -372,6 +384,7 @@ class ControlActivity extends AppCompatActivity {
                                     activity.textView.setText("L: " + Integer.toString(100 - right) + "  R: " + Integer.toString(right));
                                 } catch (Exception e) {
                                     Log.e("STRIP", e.getMessage());
+                                    e.printStackTrace();
                                 }
                                 break;
                             default:
