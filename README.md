@@ -1,7 +1,7 @@
 # Oscixer
 **Remote control of DAW**
 
-[Download](https://github.com/hotguac/Oscixer/releases)
+[Download APK (zipped)](https://github.com/hotguac/Oscixer/releases)
 
 Oscixer is an Android app that allows remote control of a Digital Audio Workstation (DAW). The DAW targeted
 during the initial development is the open source [Ardour](https://ardour.org/) v5.4.0.
