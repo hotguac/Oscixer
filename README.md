@@ -10,3 +10,9 @@ recorded. For example, placing an Android smartphone or tablet on a music stand 
 without needing to be able to see the computer screen or reach the computer keyboard.
 
 This project uses the [JavaOSC](https://github.com/hoijui/JavaOSC) library through [Maven Central](mvnrepository.com/artifact/com.illposed.osc/javaosc-core) .
+
+![alt text](https://github.com/hotguac/Oscixer/blob/master/app/src/main/res/drawable/home.png "Startup Screen")
+
+![alt text](https://github.com/hotguac/Oscixer/blob/master/app/src/main/res/drawable/home.png "Control Screen")
+
+

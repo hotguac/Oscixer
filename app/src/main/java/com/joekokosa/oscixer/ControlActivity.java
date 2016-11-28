@@ -25,7 +25,6 @@ import android.widget.TextView;
 
 import java.net.DatagramSocket;
 
-import static com.joekokosa.oscixer.FeedbackTracker.CS_FADER;
 import static com.joekokosa.oscixer.FeedbackTracker.CS_ID;
 import static com.joekokosa.oscixer.MainActivity.EXTRA_MESSAGE;
 
@@ -287,22 +286,20 @@ class ControlActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message message) {
             switch (message.what) {
-                case CixListener.FB_GAIN: // Is this used?
-                    strip = message.getData().getInt(CS_ID, 0);
-                    fader = message.getData().getFloat(CS_FADER, -999.0f);
-                    break;
                 case CixListener.FB_SELECT:
                     selected_strip = message.getData().getInt(CS_ID, 0);
                     break;
                 case CixListener.FB_NAME:
                     temp_strip = message.getData().getInt(CS_ID, 0);
-                    name = message.getData().getString(FeedbackTracker.CS_NAME, "not found");
-                    try {
-                        Toolbar toolbar = (Toolbar) this.activity.findViewById(R.id.my_toolbar);
-                        toolbar.setTitle("Oscixer  -  " + name);
-                    } catch (Exception e) {
-                        Log.e("FB_NAME", e.getMessage());
-                        e.printStackTrace();
+                    if (selected_strip == temp_strip) {
+                        name = message.getData().getString(FeedbackTracker.CS_NAME, "not found");
+                        try {
+                            Toolbar toolbar = (Toolbar) this.activity.findViewById(R.id.my_toolbar);
+                            toolbar.setTitle("Oscixer  -  " + name);
+                        } catch (Exception e) {
+                            Log.e("FB_NAME", e.getMessage());
+                            e.printStackTrace();
+                        }
                     }
                     break;
                 case CixListener.FB_TRACK_RECENABLE:
@@ -390,27 +387,6 @@ class ControlActivity extends AppCompatActivity {
                             default:
                                 Log.d("CIX", "Unhandled FB_STRIP mode");
                         }
-
-                        /*
-                        String comment = message.getData().getString(FeedbackTracker.CS_COMMENT, "");
-                        float mute = message.getData().getFloat(FeedbackTracker.CS_MUTE, 0.0f);
-                        float solo = message.getData().getFloat(FeedbackTracker.CS_SOLO, 0.0f);
-                        float solo_iso = message.getData().getFloat(FeedbackTracker.CS_SOLO_ISO, 0.0f);
-                        float solo_safe = message.getData().getFloat(FeedbackTracker.CS_SOLO_SAFE, 0.0f);
-                        float polarity = message.getData().getFloat(FeedbackTracker.CS_POLARITY, 0.0f);
-                        float monitor_input = message.getData().getFloat(FeedbackTracker.CS_MONITOR_INPUT, 0.0f);
-                        float monitor_disk = message.getData().getFloat(FeedbackTracker.CS_MONITOR_DISK, 0.0f);
-                        rec_enable = message.getData().getFloat(FeedbackTracker.CS_TRACK_RECENABLE, 0.0f);
-                        float rec_safe = message.getData().getFloat(FeedbackTracker.CS_RECSAFE, 0.0f);
-                        // TODO: findout what expanded is??
-                        float expanded = message.getData().getFloat(FeedbackTracker.CS_EXPANDED, 0.0f);
-                        float
-                        float pan_stereo_width = message.getData().getFloat(FeedbackTracker.CS_PAN_STERO_WIDTH, 0.0f);
-                        float num_inputs = message.getData().getFloat(FeedbackTracker.CS_NUM_INPUTS, 0.0f);
-                        float num_outputs = message.getData().getFloat(FeedbackTracker.CS_NUM_OUTPUTS, 0.0f);
-
-                         */
-
                     }
                     break;
             }
