@@ -28,7 +28,7 @@ import java.net.DatagramSocket;
 import static com.joekokosa.oscixer.FeedbackTracker.CS_ID;
 import static com.joekokosa.oscixer.MainActivity.EXTRA_MESSAGE;
 
-class ControlActivity extends AppCompatActivity {
+public class ControlActivity extends AppCompatActivity {
     static final public int MODE_FADER = 0;
     static final public int MODE_PAN = 1;
     static final public int MODE_TRIM = 2;

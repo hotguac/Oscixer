@@ -16,8 +16,7 @@ import com.illposed.osc.OSCPortIn;
 import java.net.DatagramSocket;
 import java.util.Date;
 
-
-class CixListener extends Service {
+public class CixListener extends Service {
 
     public static final int FB_STRIP = 0;
     public static final int FB_SELECT = 1;
