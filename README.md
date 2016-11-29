@@ -24,7 +24,7 @@ Click send to show the Oscixer control screen.
 ![alt text](https://github.com/hotguac/Oscixer/blob/master/app/src/main/res/drawable/control_screen.png "Control Screen")
 
 The arrows on the left side control which track (left/right) in [Ardour](https://ardour.org/) is being controlled and which control (fader/pan/trim) is mapped
- to the touch area box. The top of the touch area box is slightly more sensitive at the top than at the bottom and also adjusts responds more to quicker movements
+ to the touch area box. The touch area box is slightly more sensitive at the top than at the bottom and also adjusts responds more to quicker movements
  and less to slower movements.
  
  Across the bottom are transport controls. From left to right are Stop, Play, Loop toggle, Home, End, Previous Mark, and Next Mark.
