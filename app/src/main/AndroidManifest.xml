@@ -20,6 +20,7 @@
 
         <activity
             android:name="com.joekokosa.oscixer.ControlActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape" />
 
         <service android:name="com.joekokosa.oscixer.CixListener" />

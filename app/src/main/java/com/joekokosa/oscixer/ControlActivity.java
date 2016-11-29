@@ -26,7 +26,6 @@ import android.widget.TextView;
 import java.net.DatagramSocket;
 
 import static com.joekokosa.oscixer.FeedbackTracker.CS_ID;
-import static com.joekokosa.oscixer.MainActivity.EXTRA_MESSAGE;
 
 public class ControlActivity extends AppCompatActivity {
     static final public int MODE_FADER = 0;
@@ -81,26 +80,55 @@ public class ControlActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.control_surface2);
-        // https://developer.android.com/reference/android/support/constraint/ConstraintLayout.html
+        if (savedInstanceState == null) {
+            setContentView(R.layout.control_surface2);
+            // https://developer.android.com/reference/android/support/constraint/ConstraintLayout.html
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
+            Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+            setSupportActionBar(myToolbar);
 
-        try {
-            getSupportActionBar().openOptionsMenu();
-        } catch (NullPointerException e) {
-            Log.e("ControlActivity", e.getMessage());
-            e.printStackTrace();
+            try {
+                getSupportActionBar().openOptionsMenu();
+            } catch (NullPointerException e) {
+                Log.e("ControlActivity", e.getMessage());
+                e.printStackTrace();
+            }
+
+            //Intent intent = getIntent();
+            //String msg = intent.getStringExtra(EXTRA_MESSAGE);
+
+            textView = (TextView) findViewById(R.id.feedback_text);
+            //textView.setText(msg);
+
+            touch_area = (ImageView) findViewById(R.id.touch_area);
         }
+    }
 
-        Intent intent = getIntent();
-        String msg = intent.getStringExtra(EXTRA_MESSAGE);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(com.joekokosa.oscixer.R.menu.cs_menu, menu);
+        return true;
+    }
 
-        textView = (TextView) findViewById(R.id.feedback_text);
-        textView.setText(msg);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
 
-        touch_area = (ImageView) findViewById(R.id.touch_area);
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+        if (!mBound) {
+            Intent intent = new Intent(this, CixListener.class);
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+            mBound = true;
+        }
 
         controller = new DawController();
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -123,32 +151,7 @@ public class ControlActivity extends AppCompatActivity {
 
         AppCompatImageView touch_area = (AppCompatImageView) findViewById(R.id.touch_area);
         touch_area.setOnTouchListener(new TouchArea(this));
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(com.joekokosa.oscixer.R.menu.cs_menu, menu);
-        return true;
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mBound) {
-            unbindService(mConnection);
-            mBound = false;
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (!mBound) {
-            Intent intent = new Intent(this, CixListener.class);
-            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-            mBound = true;
-        }
         selected_strip = 0;
         FeedbackTracker.selected_track = 0;
         controller.connectSurface();
